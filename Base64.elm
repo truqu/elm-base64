@@ -52,14 +52,13 @@ toTupleList list =
 
 toCharList : List (Int,Int,Int) -> List Char
 toCharList bitList =
-  List.concatMap toChars bitList
-
-toChars : (Int,Int,Int) -> List Char
-toChars (a,b,c) =
-  case (a,b,c) of
-    (a, -1, -1) -> (dropLast 2 (List.map toBase64Char (partitionBits [a,0,0]))) `append` ['=','=']
-    (a, b, -1)  -> (dropLast 1 (List.map toBase64Char (partitionBits [a,b,0]))) `append` ['=']
-    (a, b, c)   -> (List.map toBase64Char (partitionBits [a,b,c]))
+  let toChars (a, b, c) =
+        case (a,b,c) of
+          (a, -1, -1) -> (dropLast 2 (List.map toBase64Char (partitionBits [a,0,0]))) `append` ['=','=']
+          (a, b, -1)  -> (dropLast 1 (List.map toBase64Char (partitionBits [a,b,0]))) `append` ['=']
+          (a, b, c)   -> (List.map toBase64Char (partitionBits [a,b,c]))
+  in
+    List.concatMap toChars bitList
 
 base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 base64CharsList = String.toList base64Chars
