@@ -14,25 +14,25 @@ fromNumber int =
 fromNumberWithSize : Int -> Int -> List Bit
 fromNumberWithSize number size =
   let
-    bitList = fromNumber(number)
-    paddingSize = size - (length(bitList))
+    bitList = fromNumber number
+    paddingSize = size - length bitList
   in
-    (repeat paddingSize Off) `append` bitList
+    repeat paddingSize Off `append` bitList
 
 fromByte : Int -> List Bit
 fromByte byte = fromNumberWithSize byte 8
 
 toByte : List Bit -> Int
-toByte bitList = toByteReverse(reverse(bitList))
+toByte bitList = toByteReverse <| reverse bitList
 
 toByteReverse : List Bit -> Int
 toByteReverse bitList = case bitList of
   [] -> 0
-  Off :: tail -> 2 * toByteReverse(tail)
-  On :: tail -> 1 + 2 * toByteReverse(tail)
+  Off :: tail -> 2 * toByteReverse tail
+  On :: tail -> 1 + 2 * toByteReverse tail
 
 partition : Int -> List Bit -> List(List Bit)
 partition size list =
-  if ((length list)<=size)
+  if length list <= size
   then [list]
-  else (take size list) :: (partition size (drop size list))
+  else take size list :: partition size (drop size list)
