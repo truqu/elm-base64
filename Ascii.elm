@@ -10,8 +10,8 @@ import Result exposing (fromMaybe)
 
 
 fromInt : Int -> Result String Char
-fromInt index =
-  fromMaybe "integer has no corresponding ascii char" (Array.get (index-32) asciiCharsArray)
+fromInt int =
+  fromMaybe "integer has no corresponding ascii char" (Array.get (int-32) asciiCharsArray)
 
 toInt : Char -> Result String Int
 toInt char =
