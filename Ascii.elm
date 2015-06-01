@@ -11,7 +11,9 @@ import Result exposing (fromMaybe)
 
 fromInt : Int -> Result String Char
 fromInt int =
-  fromMaybe "integer has no corresponding ascii char" (Array.get (int-32) asciiCharsArray)
+  let array = Array.fromList asciiCharsList
+  in
+    fromMaybe "integer has no corresponding ascii char" (Array.get (int-32) array)
 
 toInt : Char -> Result String Int
 toInt char =
@@ -24,10 +26,6 @@ isValid string =
 isAsciiChar : Char -> Bool
 isAsciiChar char =
   Dict.member char asciiCharsMap
-
-asciiCharsArray : Array Char
-asciiCharsArray =
-  Array.fromList asciiCharsList
 
 asciiCharsList : List Char
 asciiCharsList =
