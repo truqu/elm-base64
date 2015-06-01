@@ -15,22 +15,22 @@ import Dict exposing (Dict)
 
 encode : String -> Result String String
 encode s =
-  if not(Ascii.isValid(s))
+  if not (Ascii.isValid s)
   then Result.Err "Error while encoding"
   else Result.Ok (toAsciiList s |> toTupleList |> toCharList |> String.fromList)
 
 decode : String -> Result String String
 decode s =
-  if not (isValid(s))
+  if not (isValid s)
   then
     Result.Err "Error while decoding"
   else
     let bitList = List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
-        charList = resultUnfold(List.map Ascii.fromInt bitList)
+        charList = resultUnfold <| List.map Ascii.fromInt bitList
     in
-      Result.Ok(String.fromList charList)
+      Result.Ok <| String.fromList charList
 
-toAsciiList : String -> List(Int)
+toAsciiList : String -> List Int
 toAsciiList string =
   let toInt char = case Ascii.toInt char of
                      Result.Ok(value) -> value
