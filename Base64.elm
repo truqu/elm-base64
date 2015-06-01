@@ -13,6 +13,54 @@ import Result
 import Dict exposing (Dict)
 
 
+encode : String -> Result String String
+encode s =
+  if not(Ascii.isValid(s))
+  then Result.Err "Error while encoding"
+  else Result.Ok (toAsciiList s |> toTupleList |> toCharList |> String.fromList)
+
+decode : String -> Result String String
+decode s =
+  if not (isValid(s))
+  then
+    Result.Err "Error while decoding"
+  else
+    let
+       bitList : List(Int)
+       bitList = List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
+       charList : List(Char)
+       charList = resultUnfold(List.map Ascii.fromInt bitList)
+    in
+       Result.Ok(String.fromList charList)
+
+toAsciiList : String -> List(Int)
+toAsciiList string =
+  let toInt char = case Ascii.toInt char of
+                     Result.Ok(value) -> value
+                     _                -> -1
+  in
+    List.map toInt (String.toList string)
+
+toTupleList : List Int -> List (Int, Int, Int)
+toTupleList list =
+  case list of
+    a :: b :: c :: l -> (a, b, c) :: toTupleList(l)
+    a :: b :: []     -> [(a, b , -1)]
+    a :: []          -> [(a, -1, -1)]
+    []               -> []
+    _                -> [(-1, -1, -1)]
+
+toCharList : List (Int,Int,Int) -> List Char
+toCharList bitList =
+  List.concatMap toChars bitList
+
+toChars : (Int,Int,Int) -> List Char
+toChars (a,b,c) =
+  case (a,b,c) of
+    (a, -1, -1) -> (dropLast 2 (List.map toBase64Char (partitionBits [a,0,0]))) `append` ['=','=']
+    (a, b, -1)  -> (dropLast 1 (List.map toBase64Char (partitionBits [a,b,0]))) `append` ['=']
+    (a, b, c)   -> (List.map toBase64Char (partitionBits [a,b,c]))
+
 base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 base64CharsList = String.toList base64Chars
 base64CharsArray = Array.fromList base64CharsList
@@ -49,33 +97,9 @@ partitionBits : List Int -> List Int
 partitionBits list =
   List.map BitList.toByte (BitList.partition 6 (toBitList list))
 
-toChars : (Int,Int,Int) -> List Char
-toChars (a,b,c) =
-  case (a,b,c) of
-    (a, -1, -1) -> (dropLast 2 (List.map toBase64Char (partitionBits [a,0,0]))) `append` ['=','=']
-    (a, b, -1)  -> (dropLast 1 (List.map toBase64Char (partitionBits [a,b,0]))) `append` ['=']
-    (a, b, c)   -> (List.map toBase64Char (partitionBits [a,b,c]))
-
 dropLast : Int -> List a -> List a
 dropLast number list =
   List.reverse list |> List.drop number |> List.reverse
-
-toCharList : List (Int,Int,Int) -> List Char
-toCharList bitList =
-  List.concatMap toChars bitList
-
-toTupleList : List Int -> List (Int, Int, Int)
-toTupleList list =
-  case list of
-    a :: b :: c :: l -> (a, b, c) :: toTupleList(l)
-    a :: b :: []     -> [(a, b , -1)]
-    a :: []          -> [(a, -1, -1)]
-    []               -> []
-    _                -> [(-1, -1, -1)]
-
-toAsciiList : String -> List(Int)
-toAsciiList string =
-  List.map (asciiToInt) (String.toList string)
 
 toBase64BitList : String -> List(Bit)
 toBase64BitList string =
@@ -94,35 +118,9 @@ base64ToInt char =
     Just(value) -> value
     _           -> -1
 
-asciiToInt : Char -> Int
-asciiToInt char =
-  case Ascii.toInt char of
-    Result.Ok(value) -> value
-    _                -> -1
-
-encode : String -> Result String String
-encode s =
-  if not(Ascii.isValid(s))
-  then Result.Err "Error while encoding"
-  else Result.Ok (toAsciiList s |> toTupleList |> toCharList |> String.fromList)
-
 resultUnfold : List(Result a b) -> List b
 resultUnfold list =
   case list of
     []                      -> []
     Result.Ok(head) :: tail -> head :: resultUnfold(tail)
     Result.Err(err) :: tail -> []
-
-decode : String -> Result String String
-decode s =
-  if not (isValid(s))
-  then
-    Result.Err "Error while decoding"
-  else
-    let
-       bitList : List(Int)
-       bitList = List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
-       charList : List(Char)
-       charList = resultUnfold(List.map Ascii.fromInt bitList)
-    in
-       Result.Ok(String.fromList charList)
