@@ -12,6 +12,7 @@ import Maybe exposing (andThen)
 import Result
 import Dict exposing (Dict)
 
+
 base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 base64CharsList = String.toList base64Chars
 base64CharsArray = Array.fromList base64CharsList
@@ -73,8 +74,8 @@ toBase64BitList : String -> List(Bit)
 toBase64BitList string =
   let
     endingEquals = if | (String.endsWith "==" string) -> 2
-                  | (String.endsWith "=" string) -> 1
-                  | otherwise -> 0
+                      | (String.endsWith "=" string) -> 1
+                      | otherwise -> 0
     stripped = String.toList (String.dropRight endingEquals string)
     numberList = List.map base64ToInt stripped
   in
@@ -93,10 +94,8 @@ asciiToInt char = case Ascii.toInt char of
 encode : String -> Result String String
 encode s =
   if not(Ascii.isValid(s))
-  then
-    Result.Err "Error while encoding"
-  else
-    Result.Ok (toAsciiList s |> toTupleList |> toCharList |> String.fromList)
+  then Result.Err "Error while encoding"
+  else Result.Ok (toAsciiList s |> toTupleList |> toCharList |> String.fromList)
 
 resultUnfold : List(Result a b) -> List b
 resultUnfold list = case list of
