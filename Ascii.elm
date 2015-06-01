@@ -1,4 +1,4 @@
-module Ascii (fromInt, toInt, isValid, isAsciiChar) where
+module Ascii (fromInt, toInt, isValid) where
 
 import Array exposing (Array)
 import String
@@ -21,11 +21,9 @@ toInt char =
 
 isValid : String -> Bool
 isValid string =
-  List.all isAsciiChar (String.toList string)
-
-isAsciiChar : Char -> Bool
-isAsciiChar char =
-  Dict.member char asciiCharsMap
+  let isAsciiChar char = Dict.member char asciiCharsMap
+  in
+    List.all isAsciiChar (String.toList string)
 
 asciiCharsList : List Char
 asciiCharsList =
