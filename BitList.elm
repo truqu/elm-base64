@@ -7,7 +7,7 @@ type Bit = On | Off
 
 fromNumber : Int -> List Bit
 fromNumber int =
-  if | int == 0 -> []
+  if | int == 0     -> []
      | int % 2 == 1 -> fromNumber(int//2) `append` [On]
      | int % 2 == 0 -> fromNumber(int//2) `append` [Off]
 
