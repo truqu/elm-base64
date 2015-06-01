@@ -7,8 +7,6 @@ import BitList exposing (Bit)
 import Array
 import String
 import Ascii
-import Maybe
-import Maybe exposing (andThen)
 import Result
 import Dict exposing (Dict)
 
