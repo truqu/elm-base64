@@ -78,7 +78,7 @@ toBase64BitList string =
     stripped = String.toList (String.dropRight endingEquals string)
     numberList = List.map base64ToInt stripped
   in
-    dropLast (endingEquals*2)(List.concatMap (BitList.fromNumberWithLength 6) numberList)
+    dropLast (endingEquals*2) <| List.concatMap (flip BitList.fromNumberWithSize <| 6) numberList
 
 base64ToInt : Char -> Int
 base64ToInt char = case Dict.get char base64Map of
