@@ -8,25 +8,6 @@ import Maybe
 import Result
 import Result exposing (fromMaybe)
 
-asciiCharsArray : Array Char
-asciiCharsArray =
-  Array.fromList asciiCharsList
-
-asciiCharPairList : List (Char,Int)
-asciiCharPairList =
-  List.map2 (,) asciiCharsList [32..126]
-
-insertPairIntoDict : (comparable , v) -> Dict comparable v -> Dict comparable v
-insertPairIntoDict (key , value) dict =
-  Dict.insert key value dict
-
-asciiCharsMap : Dict Char Int
-asciiCharsMap =
-  List.foldl insertPairIntoDict Dict.empty asciiCharPairList
-
-isAsciiChar : Char -> Bool
-isAsciiChar char =
-  Dict.member char asciiCharsMap
 
 fromInt : Int -> Result String Char
 fromInt index =
@@ -40,6 +21,26 @@ isValid : String -> Bool
 isValid string =
   List.all isAsciiChar (String.toList string)
 
+isAsciiChar : Char -> Bool
+isAsciiChar char =
+  Dict.member char asciiCharsMap
+
+asciiCharsArray : Array Char
+asciiCharsArray =
+  Array.fromList asciiCharsList
+
 asciiCharsList : List Char
 asciiCharsList =
-  String.toList """ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
+  String.toList " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+
+asciiCharsMap : Dict Char Int
+asciiCharsMap =
+  List.foldl insertPairIntoDict Dict.empty asciiCharPairList
+
+insertPairIntoDict : (comparable , v) -> Dict comparable v -> Dict comparable v
+insertPairIntoDict (key , value) dict =
+  Dict.insert key value dict
+
+asciiCharPairList : List (Char,Int)
+asciiCharPairList =
+  List.map2 (,) asciiCharsList [32..126]
