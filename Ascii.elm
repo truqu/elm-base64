@@ -9,28 +9,37 @@ import Result
 import Result exposing (fromMaybe)
 
 asciiCharsArray : Array Char
-asciiCharsArray = Array.fromList asciiCharsList
+asciiCharsArray =
+  Array.fromList asciiCharsList
 
 asciiCharPairList : List (Char,Int)
-asciiCharPairList = List.map2 (,) asciiCharsList [32..126]
+asciiCharPairList =
+  List.map2 (,) asciiCharsList [32..126]
 
 insertPairIntoDict : (comparable , v) -> Dict comparable v -> Dict comparable v
-insertPairIntoDict (key , value) dict = Dict.insert key value dict
+insertPairIntoDict (key , value) dict =
+  Dict.insert key value dict
 
 asciiCharsMap : Dict Char Int
-asciiCharsMap = List.foldl insertPairIntoDict Dict.empty asciiCharPairList
+asciiCharsMap =
+  List.foldl insertPairIntoDict Dict.empty asciiCharPairList
 
 isAsciiChar : Char -> Bool
-isAsciiChar char = Dict.member char asciiCharsMap
+isAsciiChar char =
+  Dict.member char asciiCharsMap
 
 fromInt : Int -> Result String Char
-fromInt index = fromMaybe "integer has no corresponding ascii char" (Array.get (index-32) asciiCharsArray)
+fromInt index =
+  fromMaybe "integer has no corresponding ascii char" (Array.get (index-32) asciiCharsArray)
 
 toInt : Char -> Result String Int
-toInt char = fromMaybe "char is not a supported ascii character" (Dict.get char asciiCharsMap)
+toInt char =
+  fromMaybe "char is not a supported ascii character" (Dict.get char asciiCharsMap)
 
 isValid : String -> Bool
-isValid string = List.all isAsciiChar (String.toList string)
+isValid string =
+  List.all isAsciiChar (String.toList string)
 
 asciiCharsList : List Char
-asciiCharsList = String.toList """ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
+asciiCharsList =
+  String.toList """ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
