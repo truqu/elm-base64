@@ -31,12 +31,10 @@ asciiCharsList =
 
 asciiCharsMap : Dict Char Int
 asciiCharsMap =
-  List.foldl insertPairIntoDict Dict.empty asciiCharPairList
+  let pairs = List.map2 (,) asciiCharsList [32..126]
+  in
+    List.foldl insertPairIntoDict Dict.empty pairs
 
 insertPairIntoDict : (comparable , v) -> Dict comparable v -> Dict comparable v
 insertPairIntoDict (key , value) dict =
   Dict.insert key value dict
-
-asciiCharPairList : List (Char,Int)
-asciiCharPairList =
-  List.map2 (,) asciiCharsList [32..126]
