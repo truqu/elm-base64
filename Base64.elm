@@ -31,7 +31,7 @@ decode s =
        charList : List(Char)
        charList = resultUnfold(List.map Ascii.fromInt bitList)
     in
-       Result.Ok(String.fromList charList)
+      Result.Ok(String.fromList charList)
 
 toAsciiList : String -> List(Int)
 toAsciiList string =
