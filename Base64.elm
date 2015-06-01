@@ -24,12 +24,9 @@ isBase64Char char = Dict.member char base64Map
 
 isValid : String -> Bool
 isValid string =
-  let
-    stripped = if | (String.endsWith "==" string) -> String.dropRight 2 string
-                  | (String.endsWith "=" string) -> String.dropRight 1 string
-                  | otherwise -> string
-  in
-    String.all isBase64Char stripped
+  String.all isBase64Char <| if | String.endsWith "==" string -> String.dropRight 2 string
+                                | String.endsWith "=" string -> String.dropRight 1 string
+                                | otherwise -> string
 
 insertPairIntoDict : (v , comparable) -> Dict comparable v -> Dict comparable v
 insertPairIntoDict (value , key) dict = Dict.insert key value dict
