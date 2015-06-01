@@ -27,9 +27,9 @@ toByte bitList = toByteReverse <| reverse bitList
 
 toByteReverse : List Bit -> Int
 toByteReverse bitList = case bitList of
-  [] -> 0
+  []          -> 0
   Off :: tail -> 2 * toByteReverse tail
-  On :: tail -> 1 + 2 * toByteReverse tail
+  On :: tail  -> 1 + 2 * toByteReverse tail
 
 partition : Int -> List Bit -> List(List Bit)
 partition size list =
