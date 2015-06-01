@@ -25,11 +25,8 @@ decode s =
   then
     Result.Err "Error while decoding"
   else
-    let
-       bitList : List(Int)
-       bitList = List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
-       charList : List(Char)
-       charList = resultUnfold(List.map Ascii.fromInt bitList)
+    let bitList = List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
+        charList = resultUnfold(List.map Ascii.fromInt bitList)
     in
       Result.Ok(String.fromList charList)
 
