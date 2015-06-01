@@ -110,7 +110,6 @@ decode s =
   then
     Result.Err "Error while decoding"
   else
---    Result.Ok s
     let
        bitList : List(Int)
        bitList = List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
