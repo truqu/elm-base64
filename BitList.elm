@@ -1,7 +1,6 @@
 module BitList where
 
-import List
-import List exposing (append)
+import List exposing (..)
 
 
 type Bit = On | Off
@@ -16,15 +15,15 @@ fromNumberWithSize : Int -> Int -> List Bit
 fromNumberWithSize number size =
   let
     bitList = fromNumber(number)
-    paddingSize = size - (List.length(bitList))
+    paddingSize = size - (length(bitList))
   in
-    (List.repeat paddingSize Off) `append` bitList
+    (repeat paddingSize Off) `append` bitList
 
 fromByte : Int -> List Bit
 fromByte byte = fromNumberWithSize byte 8
 
 toByte : List Bit -> Int
-toByte bitList = toByteReverse(List.reverse(bitList))
+toByte bitList = toByteReverse(reverse(bitList))
 
 toByteReverse : List Bit -> Int
 toByteReverse bitList = case bitList of
@@ -34,6 +33,6 @@ toByteReverse bitList = case bitList of
 
 partition : Int -> List Bit -> List(List Bit)
 partition size list =
-  if ((List.length list)<=size)
+  if ((length list)<=size)
   then [list]
-  else (List.take size list) :: (partition size (List.drop size list))
+  else (take size list) :: (partition size (drop size list))
