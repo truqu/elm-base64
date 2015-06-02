@@ -59,9 +59,6 @@ base64CharsList : List Char
 base64CharsList =
   String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-base64CharsArray =
-  Array.fromList base64CharsList
-
 base64Map : Dict Char Int
 base64Map =
   List.foldl insertPairIntoDict Dict.empty (List.indexedMap (,) base64CharsList)
@@ -81,7 +78,9 @@ insertPairIntoDict (value , key) dict =
 
 toBase64Char : Int -> Char
 toBase64Char index =
-  Maybe.withDefault '!' (Array.get index base64CharsArray)
+  let array = Array.fromList base64CharsList
+  in
+    Maybe.withDefault '!' (Array.get index array)
 
 fromBase64Char : Char -> Int
 fromBase64Char char =
