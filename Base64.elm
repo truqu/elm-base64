@@ -55,6 +55,7 @@ toCharList bitList =
   in
     List.concatMap toChars bitList
 
+base64CharsList : List Char
 base64CharsList =
   String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
