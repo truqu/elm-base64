@@ -82,10 +82,6 @@ toBase64Char index =
   in
     Maybe.withDefault '!' (Array.get index array)
 
-fromBase64Char : Char -> Int
-fromBase64Char char =
-  Maybe.withDefault 0 (Dict.get char base64Map)
-
 toBitList : List Int -> List(Bit)
 toBitList list =
   List.foldr List.append [] (List.map BitList.fromByte list)
