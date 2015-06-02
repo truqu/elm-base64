@@ -55,14 +55,22 @@ toCharList bitList =
   in
     List.concatMap toChars bitList
 
-base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-base64CharsList = String.toList base64Chars
-base64CharsArray = Array.fromList base64CharsList
+base64Chars =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+base64CharsList =
+  String.toList base64Chars
+
+base64CharsArray =
+  Array.fromList base64CharsList
+
 base64Map : Dict Char Int
-base64Map = List.foldl insertPairIntoDict Dict.empty (List.indexedMap (,) base64CharsList)
+base64Map =
+  List.foldl insertPairIntoDict Dict.empty (List.indexedMap (,) base64CharsList)
 
 isBase64Char : Char -> Bool
-isBase64Char char = Dict.member char base64Map
+isBase64Char char =
+  Dict.member char base64Map
 
 isValid : String -> Bool
 isValid string =
@@ -97,12 +105,11 @@ dropLast number list =
 
 toBase64BitList : String -> List(Bit)
 toBase64BitList string =
-  let
-    endingEquals = if | (String.endsWith "==" string) -> 2
-                      | (String.endsWith "=" string)  -> 1
-                      | otherwise                     -> 0
-    stripped = String.toList (String.dropRight endingEquals string)
-    numberList = List.map base64ToInt stripped
+  let endingEquals = if | (String.endsWith "==" string) -> 2
+                        | (String.endsWith "=" string)  -> 1
+                        | otherwise                     -> 0
+      stripped = String.toList (String.dropRight endingEquals string)
+      numberList = List.map base64ToInt stripped
   in
     dropLast (endingEquals*2) <| List.concatMap (flip BitList.fromNumberWithSize <| 6) numberList
 
