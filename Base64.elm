@@ -47,7 +47,9 @@ toTupleList list =
 
 toCharList : List (Int,Int,Int) -> List Char
 toCharList bitList =
-  let toChars (a, b, c) =
+  let array = Array.fromList base64CharsList
+      toBase64Char index = Maybe.withDefault '!' (Array.get index array)
+      toChars (a, b, c) =
         case (a,b,c) of
           (a, -1, -1) -> (dropLast 2 (List.map toBase64Char (partitionBits [a,0,0]))) `append` ['=','=']
           (a, b, -1)  -> (dropLast 1 (List.map toBase64Char (partitionBits [a,b,0]))) `append` ['=']
@@ -73,12 +75,6 @@ isValid string =
                    | otherwise                   -> string
   in
     String.all isBase64Char string'
-
-toBase64Char : Int -> Char
-toBase64Char index =
-  let array = Array.fromList base64CharsList
-  in
-    Maybe.withDefault '!' (Array.get index array)
 
 toBitList : List Int -> List(Bit)
 toBitList list =
