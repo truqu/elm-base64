@@ -61,7 +61,9 @@ base64CharsList =
 
 base64Map : Dict Char Int
 base64Map =
-  List.foldl insertPairIntoDict Dict.empty (List.indexedMap (,) base64CharsList)
+  let insert (value, key) dict = Dict.insert key value dict
+  in
+    List.foldl insert Dict.empty (List.indexedMap (,) base64CharsList)
 
 isValid : String -> Bool
 isValid string =
@@ -71,10 +73,6 @@ isValid string =
             <| if | String.endsWith "==" string -> String.dropRight 2 string
                   | String.endsWith "=" string  -> String.dropRight 1 string
                   | otherwise                   -> string
-
-insertPairIntoDict : (v , comparable) -> Dict comparable v -> Dict comparable v
-insertPairIntoDict (value , key) dict =
-  Dict.insert key value dict
 
 toBase64Char : Int -> Char
 toBase64Char index =
