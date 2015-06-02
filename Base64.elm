@@ -55,11 +55,8 @@ toCharList bitList =
   in
     List.concatMap toChars bitList
 
-base64Chars =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-
 base64CharsList =
-  String.toList base64Chars
+  String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 base64CharsArray =
   Array.fromList base64CharsList
