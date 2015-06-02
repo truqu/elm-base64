@@ -68,11 +68,11 @@ base64Map =
 isValid : String -> Bool
 isValid string =
   let isBase64Char char = Dict.member char base64Map
+      string' = if | String.endsWith "==" string -> String.dropRight 2 string
+                   | String.endsWith "=" string  -> String.dropRight 1 string
+                   | otherwise                   -> string
   in
-    String.all isBase64Char
-            <| if | String.endsWith "==" string -> String.dropRight 2 string
-                  | String.endsWith "=" string  -> String.dropRight 1 string
-                  | otherwise                   -> string
+    String.all isBase64Char string'
 
 toBase64Char : Int -> Char
 toBase64Char index =
