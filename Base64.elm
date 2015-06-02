@@ -76,13 +76,11 @@ isValid string =
   in
     String.all isBase64Char string'
 
-toBitList : List Int -> List(Bit)
-toBitList list =
-  List.foldr List.append [] (List.map BitList.fromByte list)
-
 partitionBits : List Int -> List Int
 partitionBits list =
-  List.map BitList.toByte (BitList.partition 6 (toBitList list))
+  let list' = List.foldr List.append [] (List.map BitList.fromByte list)
+  in
+    List.map BitList.toByte (BitList.partition 6 list')
 
 dropLast : Int -> List a -> List a
 dropLast number list =
