@@ -16,7 +16,8 @@ examples = [
   ("aaa", "YWFh"),
   ("my updated file contents", "bXkgdXBkYXRlZCBmaWxlIGNvbnRlbnRz"),
   ("a", "YQ=="),
-  ("aa", "YWE=")
+  ("aa", "YWE="),
+  ("Elm is Cool", "RWxtIGlzIENvb2w=")
   ]
 
 tests : Test

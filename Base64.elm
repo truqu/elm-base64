@@ -17,7 +17,8 @@ import Result
 import Dict exposing (Dict)
 
 {-| base64 encodes an ascii string. If the input is not valid returns a Result.Err,
-    otherwise a Result.Ok String
+otherwise a Result.Ok String
+    encode("Elm is Cool") == Result.Ok "RWxtIGlzIENvb2w="
 -}
 encode : String -> Result String String
 encode s =
@@ -26,7 +27,8 @@ encode s =
   else Result.Ok (toAsciiList s |> toTupleList |> toCharList |> String.fromList)
 
 {-| base64 decodes an ascii string. If the input is not a valid base64 string returns a Result.Err,
-      otherwise a Result.Ok String
+otherwise a Result.Ok String
+    decode("RWxtIGlzIENvb2w=") == Result.Ok "Elm is Cool"
 -}
 decode : String -> Result String String
 decode s =
