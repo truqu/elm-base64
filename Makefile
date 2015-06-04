@@ -1,7 +1,7 @@
 default: build
 
-build: Ascii.elm
-	./.cabal-sandbox/bin/elm-make --yes Ascii.elm --output base64.js
+build: Base64.elm Ascii.elm BitList.elm
+	./.cabal-sandbox/bin/elm-make --yes Base64.elm --output base64.js
 
 clean-deps:
 	rm -rf .cabal-sandbox && rm -rf elm-stuf && rm -f cabal.sandbox.config
