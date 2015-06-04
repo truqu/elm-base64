@@ -25,12 +25,12 @@ Add the import to the elm module where you want to do some base64 en- or decodin
 
 To decode a String use
 
-``decode : String -> String
+``decode : String -> Result String String
 decode encodedString = Base64.decode encodedString``
 
 To encode a String use
 
-``encode : String -> String
+``encode : String -> Result String String
 encode regularString = Base64.encode regularString``
 
 
