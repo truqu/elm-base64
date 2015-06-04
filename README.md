@@ -11,9 +11,11 @@ these Ascii characters :
 Until the package is added to the elm repository you need to copy the
 elm files to your elm base source folder.
 
-```wget https://raw.githubusercontent.com/truqu/elm-base64/master/Ascii.elm
+```
+wget https://raw.githubusercontent.com/truqu/elm-base64/master/Ascii.elm
 wget https://raw.githubusercontent.com/truqu/elm-base64/master/Base64.elm
-wget https://raw.githubusercontent.com/truqu/elm-base64/master/BitList.elm```
+wget https://raw.githubusercontent.com/truqu/elm-base64/master/BitList.elm
+```
 
 ## Using
 
