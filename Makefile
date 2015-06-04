@@ -7,7 +7,7 @@ clean-deps:
 	rm -rf .cabal-sandbox && rm -rf elm-stuf && rm -f cabal.sandbox.config
 
 clean:
-	rm -f *.js
+	rm -f *.js && rm -rf elm-stuff/build-artifacts
 
 deps:
 	cabal sandbox init && cabal install -j elm-compiler-0.15 elm-package-0.5 elm-make-0.1.2 && ./.cabal-sandbox/bin/elm-package install --yes
