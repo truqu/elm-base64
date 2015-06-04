@@ -6,7 +6,7 @@
     "source-directories": [
         "."
     ],
-    "exposed-modules": [],
+    "exposed-modules": [Base64],
     "dependencies": {
         "elm-lang/core": "2.0.0 <= v < 3.0.0",
 	"maxsnew/IO": "1.0.0 <= v < 2.0.0",
