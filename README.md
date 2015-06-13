@@ -21,17 +21,23 @@ wget https://raw.githubusercontent.com/truqu/elm-base64/master/BitList.elm
 
 Add the import to the elm module where you want to do some base64 en- or decoding.
 
-``import Base64``
+```elm
+import Base64
+```
 
 To decode a String use
 
-``decode : String -> Result String String
-decode encodedString = Base64.decode encodedString``
+```elm
+decode : String -> Result String String
+decode encodedString = Base64.decode encodedString
+```
 
 To encode a String use
 
-``encode : String -> Result String String
-encode regularString = Base64.encode regularString``
+```elm
+encode : String -> Result String String
+encode regularString = Base64.encode regularString
+```
 
 
 ## Building Elm-Base64
