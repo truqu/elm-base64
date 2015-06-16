@@ -1,4 +1,4 @@
-module Test.Console (runDisplay) where
+module Test.Console (runDisplay, display, isOk) where
 
 import Check exposing (..)
 import Check.Investigator exposing (..)
