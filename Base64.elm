@@ -1,4 +1,10 @@
 module Base64 (encode, decode) where
+{-| Library for base64 encoding and decoding of Ascii strings.
+For the moment only works with the characters :
+
+" !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+
+-}
 
 import List
 import List exposing (append)
@@ -10,13 +16,20 @@ import Ascii
 import Result
 import Dict exposing (Dict)
 
-
+{-| base64 encodes an ascii string. If the input is not valid returns a Result.Err,
+otherwise a Result.Ok String
+    encode("Elm is Cool") == Result.Ok "RWxtIGlzIENvb2w="
+-}
 encode : String -> Result String String
 encode s =
   if not (Ascii.isValid s)
   then Result.Err "Error while encoding"
   else Result.Ok (toAsciiList s |> toTupleList |> toCharList |> String.fromList)
 
+{-| base64 decodes an ascii string. If the input is not a valid base64 string returns a Result.Err,
+otherwise a Result.Ok String
+    decode("RWxtIGlzIENvb2w=") == Result.Ok "Elm is Cool"
+-}
 decode : String -> Result String String
 decode s =
   if not (isValid s)

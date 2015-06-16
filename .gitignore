@@ -4,3 +4,4 @@ cabal.sandbox.config
 elm-stuff/
 node_modules/
 Test/*.js
+elm-io.sh
