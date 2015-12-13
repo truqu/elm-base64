@@ -5,16 +5,16 @@ import List exposing (..)
 
 type Bit = On | Off
 
+
 fromNumber : Int -> List Bit
 fromNumber int =
   if int == 0 then
     []
   else if int % 2 == 1 then
     fromNumber(int//2) `append` [On]
-  else if int % 2 == 0 then
-    fromNumber(int//2) `append` [Off]
   else
-    []
+    fromNumber(int//2) `append` [Off]
+
 
 fromNumberWithSize : Int -> Int -> List Bit
 fromNumberWithSize number size =
@@ -24,20 +24,26 @@ fromNumberWithSize number size =
   in
     repeat paddingSize Off `append` bitList
 
+
 fromByte : Int -> List Bit
 fromByte byte = fromNumberWithSize byte 8
+
 
 toByte : List Bit -> Int
 toByte bitList = toByteReverse <| reverse bitList
 
+
 toByteReverse : List Bit -> Int
-toByteReverse bitList = case bitList of
-  []          -> 0
-  Off :: tail -> 2 * toByteReverse tail
-  On :: tail  -> 1 + 2 * toByteReverse tail
+toByteReverse bitList =
+  case bitList of
+    []          -> 0
+    Off :: tail -> 2 * toByteReverse tail
+    On :: tail  -> 1 + 2 * toByteReverse tail
+
 
 partition : Int -> List Bit -> List(List Bit)
 partition size list =
-  if length list <= size
-  then [list]
-  else take size list :: partition size (drop size list)
+  if length list <= size then
+    [list]
+  else
+    take size list :: partition size (drop size list)

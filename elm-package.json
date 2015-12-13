@@ -1,5 +1,5 @@
 {
-    "version": "1.0.1",
+    "version": "2.0.0",
     "summary": "library for base64 encoding and decoding",
     "repository": "https://github.com/truqu/elm-base64.git",
     "license": "MIT",
@@ -14,7 +14,8 @@
         "NoRedInk/elm-lazy-list": "2.0.0 <= v < 3.0.0",
         "NoRedInk/elm-random-extra": "2.1.0 <= v < 3.0.0",
         "deadfoxygrandpa/elm-test": "3.0.1 <= v < 4.0.0",
-        "elm-lang/core": "3.0.0 <= v < 4.0.0"
+        "elm-lang/core": "3.0.0 <= v < 4.0.0",
+        "laszlopandy/elm-console": "1.0.3 <= v < 2.0.0"
     },
     "elm-version": "0.16.0 <= v < 0.17.0"
 }

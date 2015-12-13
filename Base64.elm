@@ -18,6 +18,7 @@ import Ascii
 import Result
 import Dict exposing (Dict)
 
+
 {-| base64 encodes an ascii string. If the input is not valid returns a Result.Err,
 otherwise a Result.Ok String
     encode("Elm is Cool") == Result.Ok "RWxtIGlzIENvb2w="
@@ -28,28 +29,32 @@ encode s =
   then Result.Err "Error while encoding"
   else Result.Ok (toAsciiList s |> toTupleList |> toCharList |> String.fromList)
 
+
 {-| base64 decodes an ascii string. If the input is not a valid base64 string returns a Result.Err,
 otherwise a Result.Ok String
     decode("RWxtIGlzIENvb2w=") == Result.Ok "Elm is Cool"
 -}
 decode : String -> Result String String
 decode s =
-  if not (isValid s)
-  then
+  if not (isValid s) then
     Result.Err "Error while decoding"
   else
-    let bitList = List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
-        charList = resultUnfold <| List.map Ascii.fromInt bitList
+    let
+      bitList = List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
+      charList = resultUnfold <| List.map Ascii.fromInt bitList
     in
       Result.Ok <| String.fromList charList
 
+
 toAsciiList : String -> List Int
 toAsciiList string =
-  let toInt char = case Ascii.toInt char of
-                     Result.Ok(value) -> value
-                     _                -> -1
+  let
+    toInt char = case Ascii.toInt char of
+                   Result.Ok(value) -> value
+                   _                -> -1
   in
     List.map toInt (String.toList string)
+
 
 toTupleList : List Int -> List (Int, Int, Int)
 toTupleList list =
@@ -72,15 +77,18 @@ toCharList bitList =
   in
     List.concatMap toChars bitList
 
+
 base64CharsList : List Char
 base64CharsList =
   String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
 
 base64Map : Dict Char Int
 base64Map =
   let insert (value, key) dict = Dict.insert key value dict
   in
     List.foldl insert Dict.empty (List.indexedMap (,) base64CharsList)
+
 
 isValid : String -> Bool
 isValid string =
@@ -95,15 +103,18 @@ isValid string =
   in
     String.all isBase64Char string'
 
+
 partitionBits : List Int -> List Int
 partitionBits list =
   let list' = List.foldr List.append [] (List.map BitList.fromByte list)
   in
     List.map BitList.toByte (BitList.partition 6 list')
 
+
 dropLast : Int -> List a -> List a
 dropLast number list =
   List.reverse list |> List.drop number |> List.reverse
+
 
 toBase64BitList : String -> List(Bit)
 toBase64BitList string =
@@ -112,7 +123,6 @@ toBase64BitList string =
       case Dict.get char base64Map of
         Just(value) -> value
         _           -> -1
-
     endingEquals =
       if (String.endsWith "==" string) then
          2
@@ -120,11 +130,11 @@ toBase64BitList string =
         1
       else
         0
-
     stripped = String.toList (String.dropRight endingEquals string)
     numberList = List.map base64ToInt stripped
   in
     dropLast (endingEquals*2) <| List.concatMap (flip BitList.fromNumberWithSize <| 6) numberList
+
 
 resultUnfold : List(Result a b) -> List b
 resultUnfold list =

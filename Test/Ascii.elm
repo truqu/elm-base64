@@ -1,19 +1,18 @@
-module Test.AsciiTest(tests) where
+module Test.Ascii (tests) where
 
 import Ascii
-import List
-import Result
-import ElmTest.Assertion exposing (..)
-import ElmTest.Test exposing(..)
+import ElmTest exposing (Test, assertEqual, defaultTest, suite)
 
 
 fromIntTest : (Char, Int) -> Test
 fromIntTest (char,int) =
   defaultTest (assertEqual (Ascii.fromInt int) (Result.Ok char))
 
+
 toIntTest : (Char, Int) -> Test
 toIntTest (char,int) =
   defaultTest (assertEqual (Ascii.toInt char) (Result.Ok int))
+
 
 examples =
   [ (' ', 32)
@@ -22,6 +21,7 @@ examples =
   , ('a', 97)
   , ('~', 126)
   ]
+
 
 tests : Test
 tests =
