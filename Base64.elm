@@ -4,6 +4,8 @@ For the moment only works with the characters :
 
 " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 
+# Method
+@docs encode, decode
 -}
 
 import List
