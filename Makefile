@@ -13,7 +13,7 @@ clean-deps:
 	rm elm-io.sh
 
 clean:
-	rm -f *.js && rm -rf elm-stuff/build-artifactsB
+	rm -f *.js && rm -rf elm-stuff/build-artifacts
 
 deps:
 	cabal sandbox init
