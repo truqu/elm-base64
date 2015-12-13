@@ -12,10 +12,8 @@ fromNumber int =
     []
   else if int % 2 == 1 then
     fromNumber(int//2) `append` [On]
-  else if int % 2 == 0 then
-    fromNumber(int//2) `append` [Off]
   else
-    []
+    fromNumber(int//2) `append` [Off]
 
 
 fromNumberWithSize : Int -> Int -> List Bit
