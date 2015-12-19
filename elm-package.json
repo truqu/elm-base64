@@ -4,7 +4,7 @@
     "repository": "https://github.com/truqu/elm-base64.git",
     "license": "MIT",
     "source-directories": [
-        "."
+        "src"
     ],
     "exposed-modules": [
         "Base64"
