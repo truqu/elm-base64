@@ -14,7 +14,7 @@ import BitList
 import BitList exposing (Bit)
 import Array
 import String
-import Ascii
+import Char
 import Result
 import Dict exposing (Dict)
 
@@ -25,9 +25,7 @@ otherwise a Result.Ok String
 -}
 encode : String -> Result String String
 encode s =
-  if not (Ascii.isValid s)
-  then Result.Err "Error while encoding"
-  else Result.Ok (toAsciiList s |> toTupleList |> toCharList |> String.fromList)
+  Result.Ok (toCodeList s |> toTupleList |> toCharList |> String.fromList)
 
 
 {-| base64 decodes an ascii string. If the input is not a valid base64 string returns a Result.Err,
@@ -41,20 +39,14 @@ decode s =
   else
     let
       bitList = List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
-      charList = resultUnfold <| List.map Ascii.fromInt bitList
+      charList = List.map Char.fromCode bitList
     in
       Result.Ok <| String.fromList charList
 
 
-toAsciiList : String -> List Int
-toAsciiList string =
-  let
-    toInt char = case Ascii.toInt char of
-                   Result.Ok(value) -> value
-                   _                -> -1
-  in
-    List.map toInt (String.toList string)
-
+toCodeList : String -> List Int
+toCodeList string =
+    List.map Char.toCode (String.toList string)
 
 toTupleList : List Int -> List (Int, Int, Int)
 toTupleList list =
@@ -134,11 +126,3 @@ toBase64BitList string =
     numberList = List.map base64ToInt stripped
   in
     dropLast (endingEquals*2) <| List.concatMap (flip BitList.fromNumberWithSize <| 6) numberList
-
-
-resultUnfold : List(Result a b) -> List b
-resultUnfold list =
-  case list of
-    []                      -> []
-    Result.Ok(head) :: tail -> head :: resultUnfold(tail)
-    Result.Err(err) :: tail -> []
