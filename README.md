@@ -1,10 +1,7 @@
 Elm-Base64
 ========
 
-A base 64 encoding and decoding library for Elm. It only supports
-these Ascii characters :
-
-``!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~``
+A base 64 encoding and decoding library for Elm.
 
 ## Usage
 
