@@ -1,4 +1,4 @@
-module Base64 exposing (encode, decode)
+module Base64 (encode, decode) where
 {-| Library for base64 encoding and decoding of Ascii strings.
 For the moment only works with the characters :
 
