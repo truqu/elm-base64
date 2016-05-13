@@ -1,5 +1,5 @@
 {
-    "version": "1.0.3",
+    "version": "1.0.4",
     "summary": "Base64 encoding and decoding",
     "repository": "https://github.com/truqu/elm-base64.git",
     "license": "MIT",
