@@ -2,6 +2,7 @@ module Test.Base64 exposing (tests)
 
 import Base64
 import ElmTest exposing (Test, assertEqual, defaultTest, suite)
+import String
 
 
 encodeTest : ( String, String ) -> Test
@@ -14,12 +15,21 @@ decodeTest ( string, base64 ) =
     defaultTest (assertEqual (Result.Ok string) (Base64.decode base64))
 
 
+longDecoded =
+    String.repeat 9000 "@"
+
+
+longEncoded =
+    String.repeat 3000 "QEBA"
+
+
 examples =
     [ ( "aaa", "YWFh" )
     , ( "my updated file contents", "bXkgdXBkYXRlZCBmaWxlIGNvbnRlbnRz" )
     , ( "a", "YQ==" )
     , ( "aa", "YWE=" )
     , ( "Elm is Cool", "RWxtIGlzIENvb2w=" )
+    , ( longDecoded, longEncoded )
     ]
 
 
