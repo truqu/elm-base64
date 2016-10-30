@@ -58,4 +58,13 @@ partition size list =
     if length list <= size then
         [ list ]
     else
-        take size list :: partition size (drop size list)
+        let
+            partitionTail size list res =
+                case list of
+                    [] ->
+                        res
+
+                    _ ->
+                        partitionTail size (drop size list) (take size list :: res)
+        in
+            partitionTail size list [] |> reverse
