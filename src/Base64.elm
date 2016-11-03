@@ -76,18 +76,19 @@ toCharList bitList =
             Array.fromList base64CharsList
 
         toBase64Char index =
-            Maybe.withDefault '!' (Array.get index array)
+            Array.get index array
+            |> Maybe.withDefault '!'
 
         toChars ( a, b, c ) =
             case ( a, b, c ) of
                 ( a, -1, -1 ) ->
-                    (dropLast 2 (List.map toBase64Char (partitionBits [ a, 0, 0 ]))) `append` [ '=', '=' ]
+                    append (dropLast 2 (List.map toBase64Char (partitionBits [ a, 0, 0 ]))) [ '=', '=' ]
 
                 ( a, b, -1 ) ->
-                    (dropLast 1 (List.map toBase64Char (partitionBits [ a, b, 0 ]))) `append` [ '=' ]
+                    append (dropLast 1 (List.map toBase64Char (partitionBits [ a, b, 0 ]))) [ '=' ]
 
                 ( a, b, c ) ->
-                    (List.map toBase64Char (partitionBits [ a, b, c ]))
+                    List.map toBase64Char (partitionBits [ a, b, c ])
     in
         List.concatMap toChars bitList
 
