@@ -81,10 +81,10 @@ toCharList bitList =
         toChars ( a, b, c ) =
             case ( a, b, c ) of
                 ( a, -1, -1 ) ->
-                    (dropLast 2 (List.map toBase64Char (partitionBits [ a, 0, 0 ]))) `append` [ '=', '=' ]
+                    append (dropLast 2 (List.map toBase64Char (partitionBits [ a, 0, 0 ]))) [ '=', '=' ]
 
                 ( a, b, -1 ) ->
-                    (dropLast 1 (List.map toBase64Char (partitionBits [ a, b, 0 ]))) `append` [ '=' ]
+                    append (dropLast 1 (List.map toBase64Char (partitionBits [ a, b, 0 ]))) [ '=' ]
 
                 ( a, b, c ) ->
                     (List.map toBase64Char (partitionBits [ a, b, c ]))
@@ -112,7 +112,7 @@ isValid string =
         isBase64Char char =
             Dict.member char base64Map
 
-        string' =
+        string_ =
             if String.endsWith "==" string then
                 String.dropRight 2 string
             else if String.endsWith "=" string then
@@ -120,16 +120,16 @@ isValid string =
             else
                 string
     in
-        String.all isBase64Char string'
+        String.all isBase64Char string_
 
 
 partitionBits : List Int -> List Int
 partitionBits list =
     let
-        list' =
+        list_ =
             List.foldr List.append [] (List.map BitList.fromByte list)
     in
-        List.map BitList.toByte (BitList.partition 6 list')
+        List.map BitList.toByte (BitList.partition 6 list_)
 
 
 dropLast : Int -> List a -> List a
@@ -137,7 +137,7 @@ dropLast number list =
     List.reverse list |> List.drop number |> List.reverse
 
 
-toBase64BitList : String -> List (Bit)
+toBase64BitList : String -> List Bit
 toBase64BitList string =
     let
         base64ToInt char =
