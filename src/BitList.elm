@@ -13,9 +13,9 @@ fromNumber int =
     if int == 0 then
         []
     else if int % 2 == 1 then
-        fromNumber (int // 2) `append` [ On ]
+        append (fromNumber (int // 2)) [ On ]
     else
-        fromNumber (int // 2) `append` [ Off ]
+        append (fromNumber (int // 2)) [ Off ]
 
 
 fromNumberWithSize : Int -> Int -> List Bit
@@ -27,7 +27,7 @@ fromNumberWithSize number size =
         paddingSize =
             size - length bitList
     in
-        repeat paddingSize Off `append` bitList
+        append (repeat paddingSize Off) bitList
 
 
 fromByte : Int -> List Bit
