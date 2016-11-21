@@ -1,7 +1,7 @@
 module Test.Base64 exposing (tests)
 
 import Base64
-import ElmTest exposing (Test, assertEqual, defaultTest, suite)
+import Legacy.ElmTest as ElmTest exposing (Test, assertEqual, defaultTest, suite)
 import String
 
 

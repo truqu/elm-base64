@@ -1,6 +1,6 @@
 module Tests exposing (..)
 
-import ElmTest exposing (Test, suite, runSuite)
+import Legacy.ElmTest as ElmTest exposing (Test, suite, runSuite)
 import Test.Base64
 import Test.BitList
 
@@ -13,6 +13,6 @@ all =
         ]
 
 
-main : Program Never
+main : Program Never () msg
 main =
     runSuite all
