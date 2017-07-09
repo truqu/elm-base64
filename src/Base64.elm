@@ -54,20 +54,23 @@ toCodeList string =
 
 
 toTupleList : List Int -> List ( Int, Int, Int )
-toTupleList list =
-    case list of
-        a :: b :: c :: l ->
-            ( a, b, c ) :: toTupleList (l)
+toTupleList =
+    let
+        toTupleListHelp acc list =
+            case list of
+                a :: b :: c :: l ->
+                    toTupleListHelp (( a, b, c ) :: acc) l
 
-        a :: b :: [] ->
-            [ ( a, b, -1 ) ]
+                a :: b :: [] ->
+                    ( a, b, -1 ) :: acc
 
-        a :: [] ->
-            [ ( a, -1, -1 ) ]
+                a :: [] ->
+                    ( a, -1, -1 ) :: acc
 
-        [] ->
-            []
-
+                [] ->
+                    acc
+    in
+        toTupleListHelp [] >> List.reverse
 
 toCharList : List ( Int, Int, Int ) -> List Char
 toCharList bitList =

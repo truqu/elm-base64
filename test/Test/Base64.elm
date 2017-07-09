@@ -16,11 +16,11 @@ decodeTest ( string, base64 ) =
 
 
 longDecoded =
-    String.repeat 9000 "@"
+    String.repeat 90000 "@"
 
 
 longEncoded =
-    String.repeat 3000 "QEBA"
+    String.repeat 30000 "QEBA"
 
 
 examples =
