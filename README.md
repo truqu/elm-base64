@@ -1,5 +1,6 @@
 Elm-Base64
 ========
+[![Build Status](https://travis-ci.org/truqu/elm-base64.svg?branch=master)](https://travis-ci.org/truqu/elm-base64)
 
 A base 64 encoding and decoding library for Elm.
 
@@ -21,6 +22,6 @@ decode encodedString = Base64.decode encodedString
 To encode a String use
 
 ```elm
-encode : String -> Result String String
+encode : String -> String
 encode regularString = Base64.encode regularString
 ```
