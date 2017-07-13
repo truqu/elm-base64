@@ -1,168 +1,38 @@
-module Base64 exposing (encode, decode)
+module Base64 exposing (decode, encode)
 
-{-| Library for base64 encoding and decoding of Ascii strings.
-For the moment only works with the characters :
+{-| Library for base64 encoding and decoding.
 
-" !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+Decodes UTF-16 into UTF-8 for encoding, and decodes UTF-8 into UTF-16 for
+encoding.
 
-# Method
+    encode "👍"
+    --> "8J+RjQ=="
+
+    decode "8J+RjQ=="
+    --> Ok "👍"
+
 @docs encode, decode
+
 -}
 
-import List
-import List exposing (append)
-import BitList
-import BitList exposing (Bit)
-import Array
-import String
-import Char
-import Result
-import Dict exposing (Dict)
+import Base64.Decode as Internal
+import Base64.Encode as Internal
 
 
-{-| base64 encodes an ascii string. If the input is not valid returns a Result.Err,
-otherwise a Result.Ok String
-    encode("Elm is Cool") == Result.Ok "RWxtIGlzIENvb2w="
+{-| Encodes any Elm string into Base64.
 -}
-encode : String -> Result String String
-encode s =
-    Result.Ok (toCodeList s |> toTupleList |> toCharList |> String.fromList)
+encode : String -> String
+encode =
+    Internal.encode
 
 
-{-| base64 decodes an ascii string. If the input is not a valid base64 string returns a Result.Err,
-otherwise a Result.Ok String
-    decode("RWxtIGlzIENvb2w=") == Result.Ok "Elm is Cool"
+{-| Decodes Base64 into Elm strings.
+
+This can result in an `Err "Invalid base64"` if the input is not valid base64.
+If the resulting string cannot be converted to UTF-16, this will result in an
+`Err "Invalid UTF-16"`.
+
 -}
 decode : String -> Result String String
-decode s =
-    if not (isValid s) then
-        Result.Err "Error while decoding"
-    else
-        let
-            bitList =
-                List.map BitList.toByte (toBase64BitList s |> BitList.partition 8)
-
-            charList =
-                List.map Char.fromCode bitList
-        in
-            Result.Ok <| String.fromList charList
-
-
-toCodeList : String -> List Int
-toCodeList string =
-    List.map Char.toCode (String.toList string)
-
-
-toTupleList : List Int -> List ( Int, Int, Int )
-toTupleList =
-    let
-        toTupleListHelp acc list =
-            case list of
-                a :: b :: c :: l ->
-                    toTupleListHelp (( a, b, c ) :: acc) l
-
-                a :: b :: [] ->
-                    ( a, b, -1 ) :: acc
-
-                a :: [] ->
-                    ( a, -1, -1 ) :: acc
-
-                [] ->
-                    acc
-    in
-        toTupleListHelp [] >> List.reverse
-
-toCharList : List ( Int, Int, Int ) -> List Char
-toCharList bitList =
-    let
-        array =
-            Array.fromList base64CharsList
-
-        toBase64Char index =
-            Maybe.withDefault '!' (Array.get index array)
-
-        toChars ( a, b, c ) =
-            case ( a, b, c ) of
-                ( a, -1, -1 ) ->
-                    append (dropLast 2 (List.map toBase64Char (partitionBits [ a, 0, 0 ]))) [ '=', '=' ]
-
-                ( a, b, -1 ) ->
-                    append (dropLast 1 (List.map toBase64Char (partitionBits [ a, b, 0 ]))) [ '=' ]
-
-                ( a, b, c ) ->
-                    (List.map toBase64Char (partitionBits [ a, b, c ]))
-    in
-        List.concatMap toChars bitList
-
-
-base64CharsList : List Char
-base64CharsList =
-    String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-
-
-base64Map : Dict Char Int
-base64Map =
-    let
-        insert ( value, key ) dict =
-            Dict.insert key value dict
-    in
-        List.foldl insert Dict.empty (List.indexedMap (,) base64CharsList)
-
-
-isValid : String -> Bool
-isValid string =
-    let
-        isBase64Char char =
-            Dict.member char base64Map
-
-        string_ =
-            if String.endsWith "==" string then
-                String.dropRight 2 string
-            else if String.endsWith "=" string then
-                String.dropRight 1 string
-            else
-                string
-    in
-        String.all isBase64Char string_
-
-
-partitionBits : List Int -> List Int
-partitionBits list =
-    let
-        list_ =
-            List.foldr List.append [] (List.map BitList.fromByte list)
-    in
-        List.map BitList.toByte (BitList.partition 6 list_)
-
-
-dropLast : Int -> List a -> List a
-dropLast number list =
-    List.reverse list |> List.drop number |> List.reverse
-
-
-toBase64BitList : String -> List Bit
-toBase64BitList string =
-    let
-        base64ToInt char =
-            case Dict.get char base64Map of
-                Just value ->
-                    value
-
-                _ ->
-                    -1
-
-        endingEquals =
-            if (String.endsWith "==" string) then
-                2
-            else if String.endsWith "=" string then
-                1
-            else
-                0
-
-        stripped =
-            String.toList (String.dropRight endingEquals string)
-
-        numberList =
-            List.map base64ToInt stripped
-    in
-        dropLast (endingEquals * 2) <| List.concatMap (flip BitList.fromNumberWithSize <| 6) numberList
+decode =
+    Internal.decode
