@@ -10,13 +10,8 @@ decode : String -> Result String String
 decode input =
     input
         |> validate
-        |> Result.andThen (decodeTriplets >> tripletsToString)
+        |> Result.andThen (String.foldl chomp initial >> wrapUp)
         |> Result.map (stripNulls input)
-
-
-validBase64Regex : Regex
-validBase64Regex =
-    regex "^([A-Za-z0-9\\/+]{4})*([A-Za-z0-9\\/+]{2}[A-Za-z0-9\\/+=]{2})?$"
 
 
 validate : String -> Result String String
@@ -25,6 +20,11 @@ validate input =
         Ok input
     else
         Err "Invalid base64"
+
+
+validBase64Regex : Regex
+validBase64Regex =
+    regex "^([A-Za-z0-9\\/+]{4})*([A-Za-z0-9\\/+]{2}[A-Za-z0-9\\/+=]{2})?$"
 
 
 stripNulls : String -> String -> String
@@ -37,143 +37,93 @@ stripNulls input output =
         output
 
 
-decodeTriplets : String -> List Int
-decodeTriplets input =
-    let
-        consumeChar : Char -> ( List Int, Int, Int ) -> ( List Int, Int, Int )
-        consumeChar char ( chars, cur, cnt ) =
-            let
-                c =
-                    charToInt char
-            in
-            case cnt of
-                3 ->
-                    ( B.or cur c :: chars, 0, 0 )
-
-                _ ->
-                    ( chars, B.or (B.shiftLeftBy ((3 - cnt) * 6) c) cur, cnt + 1 )
-
-        wrapUp : ( List Int, Int, Int ) -> List Int
-        wrapUp ( chars, _, _ ) =
-            chars
-    in
-    String.toList input
-        |> List.foldl consumeChar ( [], 0, 0 )
-        |> wrapUp
-
-
-tripletsToString : List Int -> Result String String
-tripletsToString ints =
-    let
-        decodeInt : Int -> Accumulator -> Accumulator
-        decodeInt int acc =
-            acc
-                |> add (B.shiftRightZfBy 16 int |> B.and C.xff)
-                |> add (B.shiftRightZfBy 8 int |> B.and C.xff)
-                |> add (B.shiftRightZfBy 0 int |> B.and C.xff)
-                |> flush
-    in
-    List.foldr decodeInt initialAcc ints
-        |> finish
-
-
-take8AndShift : Int -> ( Int, Int )
-take8AndShift input =
-    ( B.and C.xff input, B.shiftRightZfBy 8 input )
+wrapUp : Accumulator -> Result String String
+wrapUp ( _, _, ( _, need, res ) ) =
+    if need > 0 then
+        Err "Invalid UTF-16"
+    else
+        Ok res
 
 
 type alias Accumulator =
-    { current : Int
-    , needs : Int
-    , has : Int
-    , chars : List Char
-    , result : String
-    }
+    ( Int, Int, Utf8ToUtf16 )
 
 
-writeChars : Accumulator -> Accumulator
-writeChars ({ current } as acc) =
-    if current <= C.x10000 then
-        { acc
-            | chars = Char.fromCode current :: acc.chars
-            , current = 0
-            , needs = 0
-            , has = 0
-        }
-    else
-        let
-            c =
-                current - C.x10000
-        in
-        { acc
-            | chars =
-                Char.fromCode (B.and C.x3ff c |> B.or C.xdc00)
-                    :: Char.fromCode (B.shiftRightZfBy 10 c |> B.or C.xd800)
-                    :: acc.chars
-            , current = 0
-            , needs = 0
-            , has = 0
-        }
+type alias Base64ToUtf8 =
+    ( Int, Int )
 
 
-add : Int -> Accumulator -> Accumulator
-add int ({ has } as acc) =
+type alias Utf8ToUtf16 =
+    ( Int, Int, String )
+
+
+initial : Accumulator
+initial =
+    ( 0, 0, ( 0, 0, "" ) )
+
+
+chomp : Char -> Accumulator -> Accumulator
+chomp char_ ( curr, cnt, utf8ToUtf16 ) =
+    let
+        char : Int
+        char =
+            charToInt char_
+    in
+    case cnt of
+        3 ->
+            toUTF16 (B.or curr char) utf8ToUtf16
+
+        _ ->
+            ( B.or (B.shiftLeftBy ((3 - cnt) * 6) char) curr, cnt + 1, utf8ToUtf16 )
+
+
+toUTF16 : Int -> Utf8ToUtf16 -> Accumulator
+toUTF16 char acc =
+    ( 0
+    , 0
+    , acc
+        |> add (B.shiftRightZfBy 16 char |> B.and C.xff)
+        |> add (B.shiftRightZfBy 8 char |> B.and C.xff)
+        |> add (B.shiftRightZfBy 0 char |> B.and C.xff)
+    )
+
+
+add : Int -> Utf8ToUtf16 -> Utf8ToUtf16
+add char ( curr, need, res ) =
     let
         shiftAndAdd : Int -> Int
         shiftAndAdd int =
-            B.shiftLeftBy 6 acc.current
+            B.shiftLeftBy 6 curr
                 |> B.or (B.and C.x3f int)
-
-        writeCharsIfNeeded : Accumulator -> Accumulator
-        writeCharsIfNeeded =
-            if acc.has == (acc.needs - 1) then
-                writeChars
-            else
-                identity
     in
-    case acc.needs of
-        0 ->
-            if B.and C.x80 int == 0 then
-                { acc | chars = Char.fromCode int :: acc.chars }
-            else if B.and C.xe0 int == C.xc0 then
-                { acc | needs = 2, has = 1, current = B.and C.x1f int }
-            else if B.and C.xf0 int == C.xe0 then
-                { acc | needs = 3, has = 1, current = B.and C.xf int }
-            else
-                { acc | needs = 4, has = 1, current = B.and 7 int }
-
-        _ ->
-            { acc
-                | current = shiftAndAdd int
-                , has = acc.has + 1
-            }
-                |> writeCharsIfNeeded
-
-
-flush : Accumulator -> Accumulator
-flush acc =
-    { acc
-        | chars = []
-        , result = acc.result ++ String.fromList (List.reverse acc.chars)
-    }
-
-
-finish : Accumulator -> Result String String
-finish acc =
-    if acc.needs /= 0 then
-        Err "Invalid UTF-16"
+    if need == 0 then
+        if B.and C.x80 char == 0 then
+            ( 0, 0, res ++ intToString char )
+        else if B.and C.xe0 char == C.xc0 then
+            ( B.and C.x1f char, 1, res )
+        else if B.and C.xf0 char == C.xe0 then
+            ( B.and C.xf char, 2, res )
+        else
+            ( B.and 7 char, 3, res )
+    else if need == 1 then
+        ( 0, 0, res ++ intToString (shiftAndAdd char) )
     else
-        flush acc |> .result |> Ok
+        ( shiftAndAdd char, need - 1, res )
 
 
-initialAcc : Accumulator
-initialAcc =
-    { current = 0
-    , needs = 0
-    , has = 0
-    , chars = []
-    , result = ""
-    }
+intToString : Int -> String
+intToString int =
+    if int <= C.x10000 then
+        Char.fromCode int |> String.fromChar
+    else
+        let
+            c =
+                int - C.x10000
+        in
+        [ Char.fromCode (B.shiftRightZfBy 10 c |> B.or C.xd800)
+        , Char.fromCode (B.and C.x3ff c |> B.or C.xdc00)
+        ]
+            |> String.fromList
 
 
 charToInt : Char -> Int

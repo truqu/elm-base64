@@ -7,123 +7,123 @@ import Char
 
 encode : String -> String
 encode input =
-    stringToBytes input |> toBase64
-
-
-toBase64 : List Int -> String
-toBase64 ints =
-    let
-        takeSixAndShift : Int -> ( Int, Int )
-        takeSixAndShift input =
-            ( B.and C.x3f input, B.shiftRightZfBy 6 input )
-
-        toQuad : Int -> String
-        toQuad int =
-            (B.shiftRightZfBy 18 int |> B.and C.x3f |> intToBase64)
-                ++ (B.shiftRightZfBy 12 int |> B.and C.x3f |> intToBase64)
-                ++ (B.shiftRightZfBy 6 int |> B.and C.x3f |> intToBase64)
-                ++ (B.shiftRightZfBy 0 int |> B.and C.x3f |> intToBase64)
-
-        notZero : Int -> Int
-        notZero i =
-            if i == 0 then
-                -1
-            else
-                i
-
-        toLastQuad : Int -> String
-        toLastQuad int =
-            (B.shiftRightZfBy 18 int |> B.and C.x3f |> intToBase64)
-                ++ (B.shiftRightZfBy 12 int |> B.and C.x3f |> intToBase64)
-                ++ (B.shiftRightZfBy 6 int |> B.and C.x3f |> notZero |> intToBase64)
-                ++ (B.shiftRightZfBy 0 int |> B.and C.x3f |> notZero |> intToBase64)
-    in
-    case ints of
-        [] ->
-            ""
-
-        x :: xs ->
-            List.foldl (\int string -> toQuad int ++ string) (toLastQuad x) xs
-
-
-stringToBytes : String -> List Int
-stringToBytes input =
-    let
-        addChar : Int -> Accumulator -> Accumulator
-        addChar char (( a, b, c, combine ) as acc) =
-            case combine of
-                Nothing ->
-                    if char < C.x80 then
-                        add char acc
-                    else if char < C.x800 then
-                        acc
-                            |> add (B.or C.xc0 (B.shiftRightZfBy 6 char))
-                            |> add (B.or C.x80 (B.and C.x3f char))
-                    else if char < C.xd800 || char >= C.xe000 then
-                        acc
-                            |> add (B.or C.xe0 (B.shiftRightZfBy 12 char))
-                            |> add (B.or C.x80 (B.and C.x3f (B.shiftRightZfBy 6 char)))
-                            |> add (B.or C.x80 (B.and C.x3f char))
-                    else
-                        ( a, b, c, Just char )
-
-                Just prev ->
-                    let
-                        combined : Int
-                        combined =
-                            prev
-                                |> B.and C.x3ff
-                                |> B.shiftLeftBy 10
-                                |> B.or (B.and C.x3ff char)
-                                |> (+) C.x10000
-                    in
-                    markCombined acc
-                        |> add (B.or C.xf0 (B.shiftRightZfBy 18 combined))
-                        |> add (B.or C.x80 (B.and C.x3f (B.shiftRightZfBy 12 combined)))
-                        |> add (B.or C.x80 (B.and C.x3f (B.shiftRightZfBy 6 combined)))
-                        |> add (B.or C.x80 (B.and C.x3f combined))
-
-        wrapUp : Accumulator -> List Int
-        wrapUp ( agg, current, count, _ ) =
-            case count of
-                0 ->
-                    agg
-
-                1 ->
-                    B.shiftLeftBy 16 current :: agg
-
-                _ ->
-                    B.shiftLeftBy 8 current :: agg
-    in
-    String.foldl
-        (\c acc -> addChar (Char.toCode c) acc)
-        initialAcc
-        input
-        |> wrapUp
+    String.foldl chomp initial input |> wrapUp
 
 
 type alias Accumulator =
-    ( List Int, Int, Int, Maybe Int )
+    ( UTF8Accumulator, UTF8ToBase64Accumulator )
 
 
-initialAcc : Accumulator
-initialAcc =
-    ( [], 0, 0, Nothing )
+initial : Accumulator
+initial =
+    ( Nothing, ( "", 0, 0 ) )
 
 
-add : Int -> Accumulator -> Accumulator
-add n ( agg, current, count, combine ) =
-    case count of
+notZero : Int -> Int
+notZero i =
+    if i == 0 then
+        -1
+    else
+        i
+
+
+wrapUp : Accumulator -> String
+wrapUp ( _, ( res, cnt, acc ) ) =
+    case cnt of
+        1 ->
+            res
+                ++ (B.shiftRightZfBy 2 acc |> B.and C.x3f |> intToBase64)
+                ++ (B.shiftLeftBy 4 acc |> B.and C.x3f |> intToBase64)
+                ++ "=="
+
         2 ->
-            ( B.or (B.shiftLeftBy 8 current) n :: agg, 0, 0, Nothing )
+            res
+                ++ (B.shiftRightZfBy 10 acc |> B.and C.x3f |> intToBase64)
+                ++ (B.shiftRightZfBy 4 acc |> B.and C.x3f |> intToBase64)
+                ++ (B.shiftLeftBy 2 acc |> B.and C.x3f |> intToBase64)
+                ++ "="
 
         _ ->
-            ( agg, B.or (B.shiftLeftBy 8 current) n, count + 1, Nothing )
+            res
 
 
-markCombined : Accumulator -> Accumulator
-markCombined ( a, b, c, d ) =
-    ( a, b, c, Nothing )
+type alias UTF8Accumulator =
+    Maybe Int
+
+
+type alias UTF8ToBase64Accumulator =
+    ( String, Int, Int )
+
+
+chomp : Char -> Accumulator -> Accumulator
+chomp char_ ( utf8Acc, base64Acc ) =
+    let
+        char : Int
+        char =
+            Char.toCode char_
+    in
+    case utf8Acc of
+        Nothing ->
+            if char < C.x80 then
+                ( Nothing
+                , base64Acc
+                    |> add char
+                )
+            else if char < C.x800 then
+                ( Nothing
+                , base64Acc
+                    |> add (B.or C.xc0 (B.shiftRightZfBy 6 char))
+                    |> add (B.or C.x80 (B.and C.x3f char))
+                )
+            else if char < C.xd800 || char >= C.xe000 then
+                ( Nothing
+                , base64Acc
+                    |> add (B.or C.xe0 (B.shiftRightZfBy 12 char))
+                    |> add (B.or C.x80 (B.and C.x3f (B.shiftRightZfBy 6 char)))
+                    |> add (B.or C.x80 (B.and C.x3f char))
+                )
+            else
+                ( Just char, base64Acc )
+
+        Just prev ->
+            let
+                combined : Int
+                combined =
+                    prev
+                        |> B.and C.x3ff
+                        |> B.shiftLeftBy 10
+                        |> B.or (B.and C.x3ff char)
+                        |> (+) C.x10000
+            in
+            ( Nothing
+            , base64Acc
+                |> add (B.or C.xf0 (B.shiftRightZfBy 18 combined))
+                |> add (B.or C.x80 (B.and C.x3f (B.shiftRightZfBy 12 combined)))
+                |> add (B.or C.x80 (B.and C.x3f (B.shiftRightZfBy 6 combined)))
+                |> add (B.or C.x80 (B.and C.x3f combined))
+            )
+
+
+add : Int -> UTF8ToBase64Accumulator -> UTF8ToBase64Accumulator
+add char ( res, count, acc ) =
+    let
+        current =
+            B.or (B.shiftLeftBy 8 acc) char
+    in
+    case count of
+        2 ->
+            ( res ++ toBase64 current, 0, 0 )
+
+        _ ->
+            ( res, count + 1, current )
+
+
+toBase64 : Int -> String
+toBase64 int =
+    (B.shiftRightZfBy 18 int |> B.and C.x3f |> intToBase64)
+        ++ (B.shiftRightZfBy 12 int |> B.and C.x3f |> intToBase64)
+        ++ (B.shiftRightZfBy 6 int |> B.and C.x3f |> intToBase64)
+        ++ (B.shiftRightZfBy 0 int |> B.and C.x3f |> intToBase64)
 
 
 intToBase64 : Int -> String
