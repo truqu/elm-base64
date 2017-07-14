@@ -1,7 +1,6 @@
 module Base64.Decode exposing (decode)
 
-import Base64.Constants as C
-import Bitwise as B
+import Bitwise exposing (and, or, shiftLeftBy, shiftRightZfBy)
 import Char
 import Regex exposing (Regex, regex)
 
@@ -71,10 +70,10 @@ chomp char_ ( curr, cnt, utf8ToUtf16 ) =
     in
     case cnt of
         3 ->
-            toUTF16 (B.or curr char) utf8ToUtf16
+            toUTF16 (or curr char) utf8ToUtf16
 
         _ ->
-            ( B.or (B.shiftLeftBy ((3 - cnt) * 6) char) curr, cnt + 1, utf8ToUtf16 )
+            ( or (shiftLeftBy ((3 - cnt) * 6) char) curr, cnt + 1, utf8ToUtf16 )
 
 
 toUTF16 : Int -> Utf8ToUtf16 -> Accumulator
@@ -82,9 +81,9 @@ toUTF16 char acc =
     ( 0
     , 0
     , acc
-        |> add (B.shiftRightZfBy 16 char |> B.and C.xff)
-        |> add (B.shiftRightZfBy 8 char |> B.and C.xff)
-        |> add (B.shiftRightZfBy 0 char |> B.and C.xff)
+        |> add (shiftRightZfBy 16 char |> and 0xFF)
+        |> add (shiftRightZfBy 8 char |> and 0xFF)
+        |> add (shiftRightZfBy 0 char |> and 0xFF)
     )
 
 
@@ -93,18 +92,18 @@ add char ( curr, need, res ) =
     let
         shiftAndAdd : Int -> Int
         shiftAndAdd int =
-            B.shiftLeftBy 6 curr
-                |> B.or (B.and C.x3f int)
+            shiftLeftBy 6 curr
+                |> or (and 0x3F int)
     in
     if need == 0 then
-        if B.and C.x80 char == 0 then
+        if and 0x80 char == 0 then
             ( 0, 0, res ++ intToString char )
-        else if B.and C.xe0 char == C.xc0 then
-            ( B.and C.x1f char, 1, res )
-        else if B.and C.xf0 char == C.xe0 then
-            ( B.and C.xf char, 2, res )
+        else if and 0xE0 char == 0xC0 then
+            ( and 0x1F char, 1, res )
+        else if and 0xF0 char == 0xE0 then
+            ( and 0x0F char, 2, res )
         else
-            ( B.and 7 char, 3, res )
+            ( and 7 char, 3, res )
     else if need == 1 then
         ( 0, 0, res ++ intToString (shiftAndAdd char) )
     else
@@ -113,15 +112,15 @@ add char ( curr, need, res ) =
 
 intToString : Int -> String
 intToString int =
-    if int <= C.x10000 then
+    if int <= 0x00010000 then
         Char.fromCode int |> String.fromChar
     else
         let
             c =
-                int - C.x10000
+                int - 0x00010000
         in
-        [ Char.fromCode (B.shiftRightZfBy 10 c |> B.or C.xd800)
-        , Char.fromCode (B.and C.x3ff c |> B.or C.xdc00)
+        [ Char.fromCode (shiftRightZfBy 10 c |> or 0xD800)
+        , Char.fromCode (and 0x03FF c |> or 0xDC00)
         ]
             |> String.fromList
 

@@ -1,7 +1,6 @@
 module Base64.Encode exposing (encode)
 
-import Base64.Constants as C
-import Bitwise as B
+import Bitwise exposing (and, or, shiftLeftBy, shiftRightZfBy)
 import Char
 
 
@@ -32,15 +31,15 @@ wrapUp ( _, ( res, cnt, acc ) ) =
     case cnt of
         1 ->
             res
-                ++ (B.shiftRightZfBy 2 acc |> B.and C.x3f |> intToBase64)
-                ++ (B.shiftLeftBy 4 acc |> B.and C.x3f |> intToBase64)
+                ++ (shiftRightZfBy 2 acc |> and 0x3F |> intToBase64)
+                ++ (shiftLeftBy 4 acc |> and 0x3F |> intToBase64)
                 ++ "=="
 
         2 ->
             res
-                ++ (B.shiftRightZfBy 10 acc |> B.and C.x3f |> intToBase64)
-                ++ (B.shiftRightZfBy 4 acc |> B.and C.x3f |> intToBase64)
-                ++ (B.shiftLeftBy 2 acc |> B.and C.x3f |> intToBase64)
+                ++ (shiftRightZfBy 10 acc |> and 0x3F |> intToBase64)
+                ++ (shiftRightZfBy 4 acc |> and 0x3F |> intToBase64)
+                ++ (shiftLeftBy 2 acc |> and 0x3F |> intToBase64)
                 ++ "="
 
         _ ->
@@ -64,23 +63,23 @@ chomp char_ ( utf8Acc, base64Acc ) =
     in
     case utf8Acc of
         Nothing ->
-            if char < C.x80 then
+            if char < 0x80 then
                 ( Nothing
                 , base64Acc
                     |> add char
                 )
-            else if char < C.x800 then
+            else if char < 0x0800 then
                 ( Nothing
                 , base64Acc
-                    |> add (B.or C.xc0 (B.shiftRightZfBy 6 char))
-                    |> add (B.or C.x80 (B.and C.x3f char))
+                    |> add (or 0xC0 (shiftRightZfBy 6 char))
+                    |> add (or 0x80 (and 0x3F char))
                 )
-            else if char < C.xd800 || char >= C.xe000 then
+            else if char < 0xD800 || char >= 0xE000 then
                 ( Nothing
                 , base64Acc
-                    |> add (B.or C.xe0 (B.shiftRightZfBy 12 char))
-                    |> add (B.or C.x80 (B.and C.x3f (B.shiftRightZfBy 6 char)))
-                    |> add (B.or C.x80 (B.and C.x3f char))
+                    |> add (or 0xE0 (shiftRightZfBy 12 char))
+                    |> add (or 0x80 (and 0x3F (shiftRightZfBy 6 char)))
+                    |> add (or 0x80 (and 0x3F char))
                 )
             else
                 ( Just char, base64Acc )
@@ -90,17 +89,17 @@ chomp char_ ( utf8Acc, base64Acc ) =
                 combined : Int
                 combined =
                     prev
-                        |> B.and C.x3ff
-                        |> B.shiftLeftBy 10
-                        |> B.or (B.and C.x3ff char)
-                        |> (+) C.x10000
+                        |> and 0x03FF
+                        |> shiftLeftBy 10
+                        |> or (and 0x03FF char)
+                        |> (+) 0x00010000
             in
             ( Nothing
             , base64Acc
-                |> add (B.or C.xf0 (B.shiftRightZfBy 18 combined))
-                |> add (B.or C.x80 (B.and C.x3f (B.shiftRightZfBy 12 combined)))
-                |> add (B.or C.x80 (B.and C.x3f (B.shiftRightZfBy 6 combined)))
-                |> add (B.or C.x80 (B.and C.x3f combined))
+                |> add (or 0xF0 (shiftRightZfBy 18 combined))
+                |> add (or 0x80 (and 0x3F (shiftRightZfBy 12 combined)))
+                |> add (or 0x80 (and 0x3F (shiftRightZfBy 6 combined)))
+                |> add (or 0x80 (and 0x3F combined))
             )
 
 
@@ -108,7 +107,7 @@ add : Int -> UTF8ToBase64Accumulator -> UTF8ToBase64Accumulator
 add char ( res, count, acc ) =
     let
         current =
-            B.or (B.shiftLeftBy 8 acc) char
+            or (shiftLeftBy 8 acc) char
     in
     case count of
         2 ->
@@ -120,10 +119,10 @@ add char ( res, count, acc ) =
 
 toBase64 : Int -> String
 toBase64 int =
-    (B.shiftRightZfBy 18 int |> B.and C.x3f |> intToBase64)
-        ++ (B.shiftRightZfBy 12 int |> B.and C.x3f |> intToBase64)
-        ++ (B.shiftRightZfBy 6 int |> B.and C.x3f |> intToBase64)
-        ++ (B.shiftRightZfBy 0 int |> B.and C.x3f |> intToBase64)
+    (shiftRightZfBy 18 int |> and 0x3F |> intToBase64)
+        ++ (shiftRightZfBy 12 int |> and 0x3F |> intToBase64)
+        ++ (shiftRightZfBy 6 int |> and 0x3F |> intToBase64)
+        ++ (shiftRightZfBy 0 int |> and 0x3F |> intToBase64)
 
 
 intToBase64 : Int -> String
