@@ -2,8 +2,8 @@ module Base64 exposing (decode, encode)
 
 {-| Library for base64 encoding and decoding.
 
-Decodes UTF-16 into UTF-8 for encoding, and decodes UTF-8 into UTF-16 for
-encoding.
+Decodes UTF-16 into UTF-8 for encoding to base64, and decodes UTF-8 into UTF-16
+when decoding from base64.
 
     encode "👍"
     --> "8J+RjQ=="
