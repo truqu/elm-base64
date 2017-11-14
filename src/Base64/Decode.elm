@@ -28,9 +28,9 @@ validBase64Regex =
 
 stripNulls : String -> String -> String
 stripNulls input output =
-    if String.endsWith "==" input && String.endsWith "\x00\x00" output then
+    if String.endsWith "==" input then
         String.dropRight 2 output
-    else if String.endsWith "=" input && String.endsWith "\x00" output then
+    else if String.endsWith "=" input then
         String.dropRight 1 output
     else
         output
