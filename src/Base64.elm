@@ -1,4 +1,4 @@
-module Base64 exposing (decode, encode, padAndDecode)
+module Base64 exposing (decode, encode)
 
 {-| Library for base64 encoding and decoding.
 
@@ -15,7 +15,7 @@ when decoding from base64.
     padAndDecode "8J+RjQ"
     --> Ok "👍"
 
-@docs encode, decode, padAndDecode
+@docs encode, decode
 
 -}
 
@@ -36,22 +36,9 @@ This can result in an `Err "Invalid base64"` if the input is not valid base64.
 If the resulting string cannot be converted to UTF-16, this will result in an
 `Err "Invalid UTF-16"`.
 
+Trailing `=` characters may be omitted.
+
 -}
 decode : String -> Result String String
 decode =
     Internal.decode
-
-
-{-| Decodes non padded Base64 into Elm strings.
-
-Base64 strings might be encountered in non padded form where possible trailing
-`'='` pad characters are stripped. For example JWT tokens contain non padded
-format.
-
-`padAndDecode` will first add missing `'='` padding and then use regular strict
-`decode` function with same results.
-
--}
-padAndDecode : String -> Result String String
-padAndDecode =
-    Internal.padAndDecode

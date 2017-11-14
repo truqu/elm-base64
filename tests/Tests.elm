@@ -1,6 +1,6 @@
 module Tests exposing (..)
 
-import Base64 exposing (decode, encode, padAndDecode)
+import Base64 exposing (decode, encode)
 import Expect exposing (Expectation)
 import Fuzz exposing (string)
 import Test exposing (..)
@@ -25,26 +25,15 @@ cases =
     ]
 
 
-nonPaddedCases : List ( String, String )
-nonPaddedCases =
-    [ ( "", "" )
-    , ( "f", "Zg" )
+unpadded : List ( String, String )
+unpadded =
+    [ ( "f", "Zg" )
     , ( "fo", "Zm8" )
-    , ( "foo", "Zm9v" )
     , ( "foob", "Zm9vYg" )
-    , ( "foob", "Zm9vYg==" )
     , ( "fooba", "Zm9vYmE" )
-    , ( "foobar", "Zm9vYmFy" )
     , ( "\n", "Cg" )
-    , ( "\n", "Cg==" )
     , ( "✓ à la mode", "4pyTIMOgIGxhIG1vZGU" )
-    , ( "✓ à la mode", "4pyTIMOgIGxhIG1vZGU=" )
     , ( "💩", "8J+SqQ" )
-    , ( "💩", "8J+SqQ==" )
-    , ( "💩💩💩", "8J+SqfCfkqnwn5Kp" )
-    , ( "Man", "TWFu" )
-    , ( String.repeat 500 "Man", String.repeat 500 "TWFu" )
-    , ( String.repeat 5000 "Man", String.repeat 5000 "TWFu" )
     ]
 
 
@@ -74,17 +63,17 @@ decodeTests =
         |> describe "decode basics"
 
 
-padAndDecodeTests : Test
-padAndDecodeTests =
-    nonPaddedCases
+unpaddedDecodeTests : Test
+unpaddedDecodeTests =
+    unpadded
         |> List.map
             (\( output, input ) ->
                 test ("Can decode '" ++ input ++ "'") <|
                     \_ ->
-                        padAndDecode input
+                        decode input
                             |> Expect.equal (Ok output)
             )
-        |> describe "decode non-padded base64"
+        |> describe "decode unpadded"
 
 
 roundTrip : Test
@@ -96,11 +85,19 @@ roundTrip =
                 |> Expect.equal (Ok input)
 
 
+roundTripUnpadded : Test
+roundTripUnpadded =
+    fuzz string "Roundtrip with trailing = omitted" <|
+        \input ->
+            encode input
+                |> String.filter ((/=) '=')
+                |> decode
+                |> Expect.equal (Ok input)
+
+
 badInputTests : Test
 badInputTests =
-    [ "foo"
-    , "abc"
-    , "a=aa"
+    [ "a=aa"
     , "a==="
     ]
         |> List.map

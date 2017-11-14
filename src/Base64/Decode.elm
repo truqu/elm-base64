@@ -1,4 +1,4 @@
-module Base64.Decode exposing (decode, padAndDecode)
+module Base64.Decode exposing (decode)
 
 import Bitwise exposing (and, or, shiftLeftBy, shiftRightZfBy)
 import Char
@@ -6,25 +6,30 @@ import Regex exposing (Regex, regex)
 
 
 decode : String -> Result String String
-decode input =
+decode =
+    pad >> validateAndDecode
+
+
+validateAndDecode : String -> Result String String
+validateAndDecode input =
     input
         |> validate
         |> Result.andThen (String.foldl chomp initial >> wrapUp)
         |> Result.map (stripNulls input)
 
-padAndDecode : String -> Result String String
-padAndDecode input =
-    input |> pad |> decode
 
 pad : String -> String
 pad input =
     case rem (String.length input) 4 of
         3 ->
             input ++ "="
+
         2 ->
             input ++ "=="
+
         _ ->
             input
+
 
 validate : String -> Result String String
 validate input =
