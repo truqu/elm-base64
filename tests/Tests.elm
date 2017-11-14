@@ -25,6 +25,18 @@ cases =
     ]
 
 
+unpadded : List ( String, String )
+unpadded =
+    [ ( "f", "Zg" )
+    , ( "fo", "Zm8" )
+    , ( "foob", "Zm9vYg" )
+    , ( "fooba", "Zm9vYmE" )
+    , ( "\n", "Cg" )
+    , ( "✓ à la mode", "4pyTIMOgIGxhIG1vZGU" )
+    , ( "💩", "8J+SqQ" )
+    ]
+
+
 encodeTests : Test
 encodeTests =
     cases
@@ -51,6 +63,19 @@ decodeTests =
         |> describe "decode basics"
 
 
+unpaddedDecodeTests : Test
+unpaddedDecodeTests =
+    unpadded
+        |> List.map
+            (\( output, input ) ->
+                test ("Can decode '" ++ input ++ "'") <|
+                    \_ ->
+                        decode input
+                            |> Expect.equal (Ok output)
+            )
+        |> describe "decode unpadded"
+
+
 roundTrip : Test
 roundTrip =
     fuzz string "Roundtrip" <|
@@ -60,11 +85,19 @@ roundTrip =
                 |> Expect.equal (Ok input)
 
 
+roundTripUnpadded : Test
+roundTripUnpadded =
+    fuzz string "Roundtrip with trailing = omitted" <|
+        \input ->
+            encode input
+                |> String.filter ((/=) '=')
+                |> decode
+                |> Expect.equal (Ok input)
+
+
 badInputTests : Test
 badInputTests =
-    [ "foo"
-    , "abc"
-    , "a=aa"
+    [ "a=aa"
     , "a==="
     ]
         |> List.map

@@ -11,6 +11,10 @@ when decoding from base64.
     decode "8J+RjQ=="
     --> Ok "👍"
 
+
+    padAndDecode "8J+RjQ"
+    --> Ok "👍"
+
 @docs encode, decode
 
 -}
@@ -31,6 +35,8 @@ encode =
 This can result in an `Err "Invalid base64"` if the input is not valid base64.
 If the resulting string cannot be converted to UTF-16, this will result in an
 `Err "Invalid UTF-16"`.
+
+Trailing `=` characters may be omitted.
 
 -}
 decode : String -> Result String String
