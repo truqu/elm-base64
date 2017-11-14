@@ -1,6 +1,6 @@
 module Tests exposing (..)
 
-import Base64 exposing (decode, encode)
+import Base64 exposing (decode, encode, padAndDecode)
 import Expect exposing (Expectation)
 import Fuzz exposing (string)
 import Test exposing (..)
@@ -17,6 +17,29 @@ cases =
     , ( "foobar", "Zm9vYmFy" )
     , ( "\n", "Cg==" )
     , ( "✓ à la mode", "4pyTIMOgIGxhIG1vZGU=" )
+    , ( "💩", "8J+SqQ==" )
+    , ( "💩💩💩", "8J+SqfCfkqnwn5Kp" )
+    , ( "Man", "TWFu" )
+    , ( String.repeat 500 "Man", String.repeat 500 "TWFu" )
+    , ( String.repeat 5000 "Man", String.repeat 5000 "TWFu" )
+    ]
+
+
+nonPaddedCases : List ( String, String )
+nonPaddedCases =
+    [ ( "", "" )
+    , ( "f", "Zg" )
+    , ( "fo", "Zm8" )
+    , ( "foo", "Zm9v" )
+    , ( "foob", "Zm9vYg" )
+    , ( "foob", "Zm9vYg==" )
+    , ( "fooba", "Zm9vYmE" )
+    , ( "foobar", "Zm9vYmFy" )
+    , ( "\n", "Cg" )
+    , ( "\n", "Cg==" )
+    , ( "✓ à la mode", "4pyTIMOgIGxhIG1vZGU" )
+    , ( "✓ à la mode", "4pyTIMOgIGxhIG1vZGU=" )
+    , ( "💩", "8J+SqQ" )
     , ( "💩", "8J+SqQ==" )
     , ( "💩💩💩", "8J+SqfCfkqnwn5Kp" )
     , ( "Man", "TWFu" )
@@ -49,6 +72,19 @@ decodeTests =
                             |> Expect.equal (Ok output)
             )
         |> describe "decode basics"
+
+
+padAndDecodeTests : Test
+padAndDecodeTests =
+    nonPaddedCases
+        |> List.map
+            (\( output, input ) ->
+                test ("Can decode '" ++ input ++ "'") <|
+                    \_ ->
+                        padAndDecode input
+                            |> Expect.equal (Ok output)
+            )
+        |> describe "decode non-padded base64"
 
 
 roundTrip : Test
