@@ -18,14 +18,6 @@ initial =
     ( Nothing, ( "", 0, 0 ) )
 
 
-notZero : Int -> Int
-notZero i =
-    if i == 0 then
-        -1
-    else
-        i
-
-
 wrapUp : Accumulator -> String
 wrapUp ( _, ( res, cnt, acc ) ) =
     case cnt of
@@ -317,8 +309,5 @@ intToBase64 i =
         62 ->
             "+"
 
-        63 ->
-            "/"
-
         _ ->
-            "="
+            "/"
