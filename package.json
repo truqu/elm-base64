@@ -1,0 +1,11 @@
+{
+    "dependencies": {
+        "elm-format": "^0.7.0-exp",
+        "elm-test": "^0.18.12",
+        "elm-verify-examples": "^2.2.0"
+    },
+    "scripts": {
+        "test": "elm-verify-examples && elm-test",
+        "ci": "elm-format --validate src && npm test"
+    }
+}

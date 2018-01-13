@@ -1,2 +1,3 @@
 elm-stuff
-bench/*.html
+node_modules
+package-lock.json
