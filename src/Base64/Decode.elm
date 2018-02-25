@@ -2,7 +2,9 @@ module Base64.Decode exposing (decode)
 
 import Bitwise exposing (and, or, shiftLeftBy, shiftRightZfBy)
 import Char
-import Regex exposing (Regex, regex)
+
+
+-- import Regex exposing (Regex, regex)
 
 
 decode : String -> Result String String
@@ -20,7 +22,7 @@ validateAndDecode input =
 
 pad : String -> String
 pad input =
-    case rem (String.length input) 4 of
+    case remainderBy 4 (String.length input) of
         3 ->
             input ++ "="
 
@@ -33,15 +35,16 @@ pad input =
 
 validate : String -> Result String String
 validate input =
-    if Regex.contains validBase64Regex input then
-        Ok input
-    else
-        Err "Invalid base64"
+    -- if Regex.contains validBase64Regex input then
+    Ok input
 
 
-validBase64Regex : Regex
-validBase64Regex =
-    regex "^([A-Za-z0-9\\/+]{4})*([A-Za-z0-9\\/+]{2}[A-Za-z0-9\\/+=]{2})?$"
+
+-- else
+--     Err "Invalid base64"
+-- validBase64Regex : Regex
+-- validBase64Regex =
+--     regex "^([A-Za-z0-9\\/+]{4})*([A-Za-z0-9\\/+]{2}[A-Za-z0-9\\/+=]{2})?$"
 
 
 stripNulls : String -> String -> String
@@ -130,17 +133,7 @@ add char ( curr, need, res ) =
 
 intToString : Int -> String
 intToString int =
-    if int <= 0x00010000 then
-        Char.fromCode int |> String.fromChar
-    else
-        let
-            c =
-                int - 0x00010000
-        in
-        [ Char.fromCode (shiftRightZfBy 10 c |> or 0xD800)
-        , Char.fromCode (and 0x03FF c |> or 0xDC00)
-        ]
-            |> String.fromList
+    Debug.log "c" int |> Char.fromCode |> String.fromChar
 
 
 charToInt : Char -> Int
