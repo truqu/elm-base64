@@ -132,8 +132,8 @@ add char ( curr, need, res ) =
 
 
 intToString : Int -> String
-intToString int =
-    Debug.log "c" int |> Char.fromCode |> String.fromChar
+intToString =
+    Char.fromCode >> String.fromChar
 
 
 charToInt : Char -> Int

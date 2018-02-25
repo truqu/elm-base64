@@ -43,7 +43,7 @@ chomp char_ acc =
     let
         char : Int
         char =
-            Debug.log "i" <| Char.toCode (Debug.log "c" char_)
+            Char.toCode char_
     in
     if char < 0x80 then
         acc
