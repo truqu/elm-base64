@@ -4,6 +4,7 @@ import Bitwise exposing (and, or, shiftLeftBy, shiftRightZfBy)
 import Char
 
 
+
 -- import Regex exposing (Regex, regex)
 
 
@@ -51,8 +52,10 @@ stripNulls : String -> String -> String
 stripNulls input output =
     if String.endsWith "==" input then
         String.dropRight 2 output
+
     else if String.endsWith "=" input then
         String.dropRight 1 output
+
     else
         output
 
@@ -61,6 +64,7 @@ wrapUp : Accumulator -> Result String String
 wrapUp ( _, _, ( _, need, res ) ) =
     if need > 0 then
         Err "Invalid UTF-16"
+
     else
         Ok res
 
@@ -119,14 +123,19 @@ add char ( curr, need, res ) =
     if need == 0 then
         if and 0x80 char == 0 then
             ( 0, 0, res ++ intToString char )
+
         else if and 0xE0 char == 0xC0 then
             ( and 0x1F char, 1, res )
+
         else if and 0xF0 char == 0xE0 then
             ( and 0x0F char, 2, res )
+
         else
             ( and 7 char, 3, res )
+
     else if need == 1 then
         ( 0, 0, res ++ intToString (shiftAndAdd char) )
+
     else
         ( shiftAndAdd char, need - 1, res )
 
