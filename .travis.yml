@@ -2,7 +2,7 @@ sudo: false
 language: node_js
 node_js: "node"
 os: linux
-env: ELM_VERSION=RC1
+env: ELM_VERSION=rc1
 
 cache:
   directories:
