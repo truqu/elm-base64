@@ -1,4 +1,4 @@
-module Base64 exposing (decode, encode)
+module Base64 exposing (encode, decode)
 
 {-| Library for base64 encoding and decoding.
 

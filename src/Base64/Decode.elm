@@ -2,10 +2,7 @@ module Base64.Decode exposing (decode)
 
 import Bitwise exposing (and, or, shiftLeftBy, shiftRightZfBy)
 import Char
-
-
-
--- import Regex exposing (Regex, regex)
+import Regex exposing (Regex)
 
 
 decode : String -> Result String String
@@ -36,16 +33,17 @@ pad input =
 
 validate : String -> Result String String
 validate input =
-    -- if Regex.contains validBase64Regex input then
-    Ok input
+    if Regex.contains validBase64Regex input then
+        Ok input
+
+    else
+        Err "Invalid base64"
 
 
-
--- else
---     Err "Invalid base64"
--- validBase64Regex : Regex
--- validBase64Regex =
---     regex "^([A-Za-z0-9\\/+]{4})*([A-Za-z0-9\\/+]{2}[A-Za-z0-9\\/+=]{2})?$"
+validBase64Regex : Regex
+validBase64Regex =
+    Regex.fromString "^([A-Za-z0-9\\/+]{4})*([A-Za-z0-9\\/+]{2}[A-Za-z0-9\\/+=]{2})?$"
+        |> Maybe.withDefault Regex.never
 
 
 stripNulls : String -> String -> String
