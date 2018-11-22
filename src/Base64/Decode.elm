@@ -2,7 +2,7 @@ module Base64.Decode exposing (decode)
 
 import Bitwise exposing (and, or, shiftLeftBy, shiftRightZfBy)
 import Char
-import Regex exposing (Regex, regex)
+import Regex exposing (Regex)
 
 
 decode : String -> Result String String
@@ -20,7 +20,7 @@ validateAndDecode input =
 
 pad : String -> String
 pad input =
-    case rem (String.length input) 4 of
+    case remainderBy 4 (String.length input) of
         3 ->
             input ++ "="
 
@@ -35,21 +35,25 @@ validate : String -> Result String String
 validate input =
     if Regex.contains validBase64Regex input then
         Ok input
+
     else
         Err "Invalid base64"
 
 
 validBase64Regex : Regex
 validBase64Regex =
-    regex "^([A-Za-z0-9\\/+]{4})*([A-Za-z0-9\\/+]{2}[A-Za-z0-9\\/+=]{2})?$"
+    Regex.fromString "^([A-Za-z0-9\\/+]{4})*([A-Za-z0-9\\/+]{2}[A-Za-z0-9\\/+=]{2})?$"
+        |> Maybe.withDefault Regex.never
 
 
 stripNulls : String -> String -> String
 stripNulls input output =
     if String.endsWith "==" input then
         String.dropRight 2 output
+
     else if String.endsWith "=" input then
         String.dropRight 1 output
+
     else
         output
 
@@ -58,6 +62,7 @@ wrapUp : Accumulator -> Result String String
 wrapUp ( _, _, ( _, need, res ) ) =
     if need > 0 then
         Err "Invalid UTF-16"
+
     else
         Ok res
 
@@ -116,31 +121,26 @@ add char ( curr, need, res ) =
     if need == 0 then
         if and 0x80 char == 0 then
             ( 0, 0, res ++ intToString char )
+
         else if and 0xE0 char == 0xC0 then
             ( and 0x1F char, 1, res )
+
         else if and 0xF0 char == 0xE0 then
             ( and 0x0F char, 2, res )
+
         else
             ( and 7 char, 3, res )
+
     else if need == 1 then
         ( 0, 0, res ++ intToString (shiftAndAdd char) )
+
     else
         ( shiftAndAdd char, need - 1, res )
 
 
 intToString : Int -> String
-intToString int =
-    if int <= 0x00010000 then
-        Char.fromCode int |> String.fromChar
-    else
-        let
-            c =
-                int - 0x00010000
-        in
-        [ Char.fromCode (shiftRightZfBy 10 c |> or 0xD800)
-        , Char.fromCode (and 0x03FF c |> or 0xDC00)
-        ]
-            |> String.fromList
+intToString =
+    Char.fromCode >> String.fromChar
 
 
 charToInt : Char -> Int

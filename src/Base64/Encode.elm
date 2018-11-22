@@ -9,17 +9,13 @@ encode input =
     String.foldl chomp initial input |> wrapUp
 
 
-type alias Accumulator =
-    ( UTF8Accumulator, UTF8ToBase64Accumulator )
-
-
 initial : Accumulator
 initial =
-    ( Nothing, ( "", 0, 0 ) )
+    ( "", 0, 0 )
 
 
 wrapUp : Accumulator -> String
-wrapUp ( _, ( res, cnt, acc ) ) =
+wrapUp ( res, cnt, acc ) =
     case cnt of
         1 ->
             res
@@ -38,64 +34,41 @@ wrapUp ( _, ( res, cnt, acc ) ) =
             res
 
 
-type alias UTF8Accumulator =
-    Maybe Int
-
-
-type alias UTF8ToBase64Accumulator =
+type alias Accumulator =
     ( String, Int, Int )
 
 
 chomp : Char -> Accumulator -> Accumulator
-chomp char_ ( utf8Acc, base64Acc ) =
+chomp char_ acc =
     let
         char : Int
         char =
             Char.toCode char_
     in
-    case utf8Acc of
-        Nothing ->
-            if char < 0x80 then
-                ( Nothing
-                , base64Acc
-                    |> add char
-                )
-            else if char < 0x0800 then
-                ( Nothing
-                , base64Acc
-                    |> add (or 0xC0 (shiftRightZfBy 6 char))
-                    |> add (or 0x80 (and 0x3F char))
-                )
-            else if char < 0xD800 || char >= 0xE000 then
-                ( Nothing
-                , base64Acc
-                    |> add (or 0xE0 (shiftRightZfBy 12 char))
-                    |> add (or 0x80 (and 0x3F (shiftRightZfBy 6 char)))
-                    |> add (or 0x80 (and 0x3F char))
-                )
-            else
-                ( Just char, base64Acc )
+    if char < 0x80 then
+        acc
+            |> add char
 
-        Just prev ->
-            let
-                combined : Int
-                combined =
-                    prev
-                        |> and 0x03FF
-                        |> shiftLeftBy 10
-                        |> or (and 0x03FF char)
-                        |> (+) 0x00010000
-            in
-            ( Nothing
-            , base64Acc
-                |> add (or 0xF0 (shiftRightZfBy 18 combined))
-                |> add (or 0x80 (and 0x3F (shiftRightZfBy 12 combined)))
-                |> add (or 0x80 (and 0x3F (shiftRightZfBy 6 combined)))
-                |> add (or 0x80 (and 0x3F combined))
-            )
+    else if char < 0x0800 then
+        acc
+            |> add (or 0xC0 (shiftRightZfBy 6 char))
+            |> add (or 0x80 (and 0x3F char))
+
+    else if char < 0xD800 || char >= 0xE000 && char <= 0xFFFF then
+        acc
+            |> add (or 0xE0 (shiftRightZfBy 12 char))
+            |> add (or 0x80 (and 0x3F (shiftRightZfBy 6 char)))
+            |> add (or 0x80 (and 0x3F char))
+
+    else
+        acc
+            |> add (or 0xF0 (shiftRightZfBy 18 char))
+            |> add (or 0x80 (and 0x3F (shiftRightZfBy 12 char)))
+            |> add (or 0x80 (and 0x3F (shiftRightZfBy 6 char)))
+            |> add (or 0x80 (and 0x3F char))
 
 
-add : Int -> UTF8ToBase64Accumulator -> UTF8ToBase64Accumulator
+add : Int -> Accumulator -> Accumulator
 add char ( res, count, acc ) =
     let
         current =
